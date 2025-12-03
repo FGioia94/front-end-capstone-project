@@ -1,0 +1,31 @@
+#game-field {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  flex-wrap: wrap;
+  background-size: cover;
+  background-position: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.product-card {
+  width: 10em;
+  background-color: transparent;
+}
+.product-display {
+}
+.game-display {
+}
+
+.game-display .product-card {
+  width: calc(var(--card-size) * 3);
+}
+
+.game-display .product-card img {
+  width: calc(var(--card-size) * 3);
+}
+
+.product-card img {
+  width: 10em;
+}
