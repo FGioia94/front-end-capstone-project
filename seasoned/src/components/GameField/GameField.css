@@ -1,16 +1,22 @@
 #game-field {
   display: flex;
   flex-direction: row;
-  gap: 30px;
   flex-wrap: wrap;
   background-size: cover;
   background-position: center;
   width: 100vw;
   height: 100vh;
+  margin: 0px;
+  border: 2em solid black;
 }
 
 .product-card {
+  position: absolute;
+  left: var(--card-x);
+  top: var(--card-y);
   width: 10em;
+  border: 1em solid black;
+  border-radius: 2em;
   background-color: transparent;
 }
 .product-display {
@@ -19,13 +25,44 @@
 }
 
 .game-display .product-card {
-  width: calc(var(--card-size) * 3);
+  height: calc(var(--card-height));
+  width: calc(var(--card-width));
 }
 
 .game-display .product-card img {
-  width: calc(var(--card-size) * 3);
+  height: calc(var(--card-height));
+  width: calc(var(--card-width));
 }
 
 .product-card img {
   width: 10em;
+}
+
+
+/* PRODUCT MODE (default) ---------------------------------------*/
+.product-display .product-card {
+  position: static;       /* normal flex layout */
+  width: 10em;
+  height: auto;
+}
+
+.product-display .product-card img {
+  width: 10em;
+  height: auto;
+}
+
+
+/* GAME MODE ------------------------------------------------------*/
+.game-display .product-card {
+  position: absolute;
+  left: var(--card-x);
+  top: var(--card-y);
+  width: var(--card-width);
+  height: var(--card-height);
+}
+
+.game-display .product-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
