@@ -1,0 +1,7 @@
+#player {
+  position: absolute;
+  left: var(--player-x);
+  top: var(--player-y);
+  width: 3em;
+  background-color: orange;
+}

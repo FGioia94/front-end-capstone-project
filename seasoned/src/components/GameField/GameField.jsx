@@ -1,7 +1,7 @@
 import ProductCard from "../ProductCard/ProductCard";
 import { useState, useEffect, useRef } from "react";
 import { mulberry32, remap } from "../../utils/mathUtils.js";
-
+import Player from "../Player/Player.jsx";
 import "./GameField.css";
 
 const GameField = () => {
@@ -11,6 +11,8 @@ const GameField = () => {
   const [gameMode, setGameMode] = useState(false);
   const [positions, setPositions] = useState({});
   const [sizes, setSizes] = useState({});
+  const [score, setScore] = useState(0);
+  const [pause, setPause] = useState(false);
 
   const updatePosition = (id, pos) => {
     setPositions((prev) => ({ ...prev, [id]: pos }));
@@ -165,6 +167,7 @@ const GameField = () => {
 
   const initializeGame = () => {
     if (Object.keys(sizes).length === 0) {
+      // NOTE FOR REFACTORING STAGE - CHECK BETTER LOGGING OPTIONS THAT ALLOWS FOR DIFFERENT VERBOSITIES
       console.log("Waiting for sizes to initialize positions...");
       return;
     }
@@ -219,21 +222,27 @@ const GameField = () => {
       // products.forEach((prod) => {
       //   if (positions[prod.id].y )
       // })
+
       move(1); // move 1px per frame
       products.forEach((prod) => {
         if (
           positions[prod.id].y + sizes[prod.id].height >=
           containerSize.height
         ) {
-          return;
+          updatePosition(prod.id, {
+            x: Math.random() * containerSize.width,
+            y: 0,
+          });
+          setScore(score + 1);
         }
       });
 
       animationFrameId = requestAnimationFrame(loop);
     };
 
-    animationFrameId = requestAnimationFrame(loop);
-
+    if (!pause) {
+      animationFrameId = requestAnimationFrame(loop);
+    }
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameMode, positions]);
 
@@ -270,6 +279,7 @@ const GameField = () => {
       >
         {gameMode ? "Product Mode" : "Game Mode"}
       </button>
+      {gameMode ? <Player containerSize={containerSize}></Player> : ""}
     </>
   );
 };
