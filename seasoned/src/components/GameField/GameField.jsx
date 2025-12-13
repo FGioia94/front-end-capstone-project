@@ -13,7 +13,10 @@ const GameField = () => {
   const [sizes, setSizes] = useState({});
   const [score, setScore] = useState(0);
   const [pause, setPause] = useState(false);
-
+  const [playerPos, setPlayerPos] = useState({
+    x: containerSize.width / 2,
+    y: containerSize.height - 1,
+  });
   const updatePosition = (id, pos) => {
     setPositions((prev) => ({ ...prev, [id]: pos }));
   };
@@ -222,9 +225,20 @@ const GameField = () => {
       // products.forEach((prod) => {
       //   if (positions[prod.id].y )
       // })
+      console.log(sizes);
 
       move(1); // move 1px per frame
       products.forEach((prod) => {
+        console.log(sizes[prod.id]);
+        if (sizes[prod.id]) {
+          if (
+            (playerPos.x >= positions[prod.id].x - sizes[prod.id].width ||
+              playerPos.x <= positions[prod.id].x + sizes[prod.id].width) &&
+            playerPos.y <= positions[prod.id].y - sizes[prod.id].height
+          ) {
+            console.log("touching");
+          }
+        }
         if (
           positions[prod.id].y + sizes[prod.id].height >=
           containerSize.height
@@ -279,7 +293,11 @@ const GameField = () => {
       >
         {gameMode ? "Product Mode" : "Game Mode"}
       </button>
-      {gameMode ? <Player containerSize={containerSize}></Player> : ""}
+      {gameMode ? (
+        <Player playerPos={playerPos} setPlayerPos={setPlayerPos}></Player>
+      ) : (
+        ""
+      )}
     </>
   );
 };

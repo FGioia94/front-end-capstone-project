@@ -1,11 +1,26 @@
 import "./Player.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const Player = ({ containerSize }) => {
-  const [playerPos, setPlayerPos] = useState({
-    x: containerSize.width / 2,
-    y: containerSize.height - 1,
-  });
+const Player = ({ playerPos, setPlayerPos }) => {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      setPlayerPos((prevPos) => {
+        if (event.key === "ArrowLeft") {
+          return { x: prevPos.x - 10, y: prevPos.y };
+        } else if (event.key === "ArrowRight") {
+          return { x: prevPos.x + 10, y: prevPos.y };
+        }
+        return prevPos; // unchanged if other keys
+      });
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   console.log("player");
 
