@@ -1,68 +1,92 @@
+/* ---------------------------------------------------
+   GAME FIELD
+--------------------------------------------------- */
 #game-field {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  background-size: cover;
-  background-position: center;
+  position: relative;
   width: 100vw;
   height: 100vh;
-  margin: 0px;
-  border: 2em solid black;
+  margin: 0;
+  overflow: hidden; /* prevents scroll/zoom artifacts */
+  background-size: cover;
+  background-position: center;
 }
 
+/* ---------------------------------------------------
+   BASE CARD (shared)
+--------------------------------------------------- */
 .product-card {
   position: absolute;
   left: var(--card-x);
   top: var(--card-y);
-  width: 10em;
-  border: 1em solid black;
-  border-radius: 2em;
+  border: 8px solid black;
+  border-radius: 24px;
   background-color: transparent;
-}
-.product-display {
-}
-.game-display {
+  box-sizing: border-box;
 }
 
+/* ---------------------------------------------------
+   GAME MODE
+--------------------------------------------------- */
 .game-display .product-card {
-  height: calc(var(--card-height));
-  width: calc(var(--card-width));
-}
-
-.game-display .product-card img {
-  height: calc(var(--card-height));
-  width: calc(var(--card-width));
-}
-
-.product-card img {
-  width: 10em;
-}
-
-
-/* PRODUCT MODE (default) ---------------------------------------*/
-.product-display .product-card {
-  position: static;       /* normal flex layout */
-  width: 10em;
-  height: auto;
-}
-
-.product-display .product-card img {
-  width: 10em;
-  height: auto;
-}
-
-
-/* GAME MODE ------------------------------------------------------*/
-.game-display .product-card {
-  position: absolute;
-  left: var(--card-x);
-  top: var(--card-y);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: var(--card-width);
   height: var(--card-height);
 }
 
 .game-display .product-card img {
-  width: 100%;
-  height: 100%;
+  width: 60%;
+  height: 60%;
   object-fit: contain;
+}
+
+/* ---------------------------------------------------
+   PRODUCT MODE (store view)
+--------------------------------------------------- */
+.product-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20vw, 10fr));
+  gap: 2rem;
+  padding: 16px;
+}
+.product-display .product-card {
+  position: static;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.product-display .product-card .card-body {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2rem;
+}
+
+.product-display .product-card .card-title {
+  font-weight: 700;
+}
+.product-display .product-card .card-text {
+  width: 70%;
+  text-align: center;
+}
+
+.product-display .product-card img {
+  width: 50%;
+  padding: 2rem;
+  height: auto;
+}
+.product-display .product-card:hover {
+  background-color: lightblue;
+  
+}
+/* ---------------------------------------------------
+   PREVENT TEXT / IMAGE SCALING ISSUES
+--------------------------------------------------- */
+* {
+  box-sizing: border-box;
 }

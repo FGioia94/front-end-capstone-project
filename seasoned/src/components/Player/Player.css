@@ -2,6 +2,6 @@
   position: absolute;
   left: var(--player-x);
   top: var(--player-y);
-  width: 3em;
+  width: 50px;
   background-color: orange;
 }

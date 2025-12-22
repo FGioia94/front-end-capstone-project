@@ -1,36 +1,71 @@
 import "./CustomNavbar.css";
+import { Link, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
 
-const CustomNavbar = () => {
-  const handleSearch = (event) => {
-    event.preventDefault();
-    console.log("search");
+const CustomNavbar = ({ products }) => {
+  const [searchText, setSearchText] = useState("");
+  const [warning, setWarning] = useState("");
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   if (searchText.trim() === "") {
+  //     setWarning("Field cannot be empty!");
+  //   } else {
+  //     setWarning("");
+  //   }
+  // }, [searchText]);
+
+  const checkText = () => {
+    if (searchText.trim() === "") {
+      setWarning("Field cannot be empty!");
+    } else {
+      setWarning("");
+    }
   };
 
-  const handleChange = (event) => {};
+  const search = (event) => {
+    event.preventDefault();
+    checkText();
+    if (warning !== "") {
+      return;
+    } else {
+      navigate(`/search?q=${encodeURIComponent(searchText)}`);
+    }
+
+    products.filter((prod) => {
+      prod.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        prod.description.toLowerCase().includes(searchText.toLowerCase());
+    });
+  };
   return (
     <>
       <nav>
         <ul>
           <li>
-            <a>Home</a>
+            <Link to={"/"}>Home</Link>
           </li>
           <li>
-            <a>About</a>
+            <Link to={"/about"}>About</Link>
           </li>
           <li>
-            <a>Get Started</a>
+            <Link to={"/contacts"}>Contacts</Link>
           </li>
           <li>
-            <a>Contacts</a>
-          </li>
-          <li>
-            <a>Admin Login</a>
+            <Link to={"/admin-login"}>Admin Login</Link>
           </li>
 
           <li>
-            <form onSubmit={handleSearch}>
-              <label for="searchbar"></label>
-              <input type="text" name="searchbar" onChange={handleSearch} />
+            <form onSubmit={search}>
+              <input
+                type="text"
+                name="searchbar"
+                onChange={(event) => {
+                  setSearchText(event.target.value);
+                }}
+                onBlur={checkText}
+                onFocus={() => {setWarning("")}}
+              />
+              {warning && <p className="warning">{warning}</p>}
               <button type="submit" id="search-button">
                 Search
               </button>

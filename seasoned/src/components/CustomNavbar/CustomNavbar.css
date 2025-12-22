@@ -3,8 +3,13 @@ nav {
 }
 
 nav ul {
+  list-style-type: none;
   display: flex;
   flex-direction: row;
   gap: 3vw;
   justify-content: flex-start;
+}
+
+.warning {
+  background-color: red;
 }

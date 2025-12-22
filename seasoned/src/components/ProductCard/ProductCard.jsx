@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
+import { Link } from "react-router";
 
 const ProductCard = ({ position, size, prod, gameMode }) => {
   const pos = position || { x: 0, y: 0 };
@@ -8,11 +8,10 @@ const ProductCard = ({ position, size, prod, gameMode }) => {
   if (!size) {
     size = { height: 80, width: 100 };
   }
-  return (
+
+  const cardContent = (
     <Card
-      className={
-        gameMode ? "card product-card" : "card product-card game-display"
-      }
+      className={gameMode ? "card product-card" : "card product-card game-display"}
       style={{
         "--card-height": `${size.height}px`,
         "--card-width": `${size.width}px`,
@@ -21,14 +20,17 @@ const ProductCard = ({ position, size, prod, gameMode }) => {
       }}
     >
       <Card.Img src={prod.image} />
-      <Card.Body>
-        <Card.Title>{gameMode ? "" : prod.title}</Card.Title>
-        <Card.Text>{gameMode ? "" : prod.description}</Card.Text>
-        <Card.Text>${prod.price}</Card.Text>
-        <Button variant="primary">Add to Cart</Button>
-      </Card.Body>
+      {!gameMode && (
+        <Card.Body>
+          <Card.Title className="card-title">{prod.title}</Card.Title>
+          <Card.Text>${prod.price}</Card.Text>
+          <Button variant="primary">Add to Cart</Button>
+        </Card.Body>
+      )}
     </Card>
   );
+
+  return gameMode ? cardContent : <Link to={`/product/${prod.id}`}>{cardContent}</Link>;
 };
 
 export default ProductCard;

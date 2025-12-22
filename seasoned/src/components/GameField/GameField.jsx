@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { mulberry32, remap } from "../../utils/mathUtils.js";
 import Player from "../Player/Player.jsx";
 import "./GameField.css";
+import ControlPanel from "../ControlPanel/ControlPanel.jsx";
 
 const GameField = () => {
   const containerRef = useRef(null);
@@ -13,13 +14,27 @@ const GameField = () => {
   const [sizes, setSizes] = useState({});
   const [score, setScore] = useState(0);
   const [pause, setPause] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [playerPos, setPlayerPos] = useState({
     x: containerSize.width / 2,
     y: containerSize.height - 1,
   });
+
+  const [speed, setSpeed] = useState(1);
+  const [highScore, setHighScore] = useState(0);
+
   const updatePosition = (id, pos) => {
     setPositions((prev) => ({ ...prev, [id]: pos }));
   };
+
+  useEffect(() => {
+    if (containerSize.width === 0 || containerSize.height === 0) return;
+
+    setPlayerPos({
+      x: containerSize.width / 2,
+      y: containerSize.height - 50, // give the player some height
+    });
+  }, [containerSize]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -34,13 +49,13 @@ const GameField = () => {
   const getCardSize = (price) => {
     let remappedValue;
     if (price < 50) {
-      remappedValue = remap(price, 0, 50, 0, 50);
-    } else if (price < 400) {
-      remappedValue = remap(price, 0, 400, 0, 200);
+      remappedValue = remap(price, 0, 50, 150, 300);
+    } else if (price >= 50 && price <= 400) {
+      remappedValue = remap(price, 50, 400, 300, 400);
     } else {
-      remappedValue = 80;
+      remappedValue = 500;
     }
-    return { height: remappedValue * 0.8, width: remappedValue };
+    return { height: remappedValue * 0.6, width: remappedValue * 0.4 };
   };
 
   const updateSize = (id, size) => {
@@ -79,8 +94,8 @@ const GameField = () => {
   const generateRandomPositions = (element, maxHeight, maxWidth) => {
     const x = mulberry32(element.id)() * Math.random();
     const y = mulberry32(element.id + 1)() * Math.random();
-    const posX = Math.floor(x * maxWidth);
-    const posY = Math.floor(y * maxHeight);
+    const posX = Math.floor(x * maxWidth - sizes[element.id].width);
+    const posY = Math.floor(y * maxHeight - sizes[element.id].height);
 
     return { x: posX, y: posY };
   };
@@ -103,9 +118,9 @@ const GameField = () => {
     if (keys.length === 0) return finalPositions;
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-    const padding = 5;
+    const padding = 100;
     let iteration = 0;
-    const maxIterations = 3000;
+    const maxIterations = 9000;
     let collisionsExist = true;
 
     while (collisionsExist && iteration < maxIterations) {
@@ -209,7 +224,7 @@ const GameField = () => {
 
       const newPos = {
         x: currentPos.x,
-        y: currentPos.y + amount,
+        y: currentPos.y + amount * speed,
       };
 
       updatePosition(prod.id, newPos);
@@ -222,43 +237,68 @@ const GameField = () => {
     let animationFrameId;
 
     const loop = () => {
-      // products.forEach((prod) => {
-      //   if (positions[prod.id].y )
-      // })
-      console.log(sizes);
+      move(1); // move 5px per frame
 
-      move(1); // move 1px per frame
       products.forEach((prod) => {
-        console.log(sizes[prod.id]);
-        if (sizes[prod.id]) {
-          if (
-            (playerPos.x >= positions[prod.id].x - sizes[prod.id].width ||
-              playerPos.x <= positions[prod.id].x + sizes[prod.id].width) &&
-            playerPos.y <= positions[prod.id].y - sizes[prod.id].height
-          ) {
-            console.log("touching");
-          }
-        }
+        if (!sizes[prod.id] || !positions[prod.id]) return;
+
+        // collision with player
         if (
-          positions[prod.id].y + sizes[prod.id].height >=
-          containerSize.height
+          isColliding(
+            playerPos,
+            { x: 50, y: 10 },
+            positions[prod.id],
+            sizes[prod.id]
+          )
         ) {
-          updatePosition(prod.id, {
-            x: Math.random() * containerSize.width,
-            y: 0,
-          });
-          setScore(score + 1);
+          console.log("PLAYER COLLISION");
+        }
+
+        // respawn if off screen
+        if (positions[prod.id].y >= containerSize.height) {
+          let attempts = 0;
+          do {
+            updatePosition(prod.id, {
+              x: Math.random() * containerSize.width,
+              y: (Math.random() * containerSize.width) / 3,
+            });
+            attempts++;
+            console.log("resolve");
+          } while (
+            // check against ALL other products
+            products.some(
+              (p) =>
+                p.id !== prod.id &&
+                isColliding(
+                  positions[prod.id],
+                  sizes[prod.id],
+                  positions[p.id],
+                  sizes[p.id]
+                )
+            ) &&
+            attempts < 2000
+          );
+
+          setScore((prev) => prev + 1);
         }
       });
 
       animationFrameId = requestAnimationFrame(loop);
     };
 
-    if (!pause) {
-      animationFrameId = requestAnimationFrame(loop);
-    }
+    animationFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [gameMode, positions]);
+  }, [
+    gameMode,
+    products,
+    positions,
+    sizes,
+    containerSize,
+    playerPos,
+    move,
+    updatePosition,
+    setScore,
+  ]);
 
   useEffect(() => {
     if (gameMode && Object.keys(sizes).length === products.length) {
@@ -268,6 +308,15 @@ const GameField = () => {
 
   return (
     <>
+      {gameMode ? (
+        <ControlPanel
+          score={score}
+          speed={speed}
+          setSpeed={setSpeed}
+        ></ControlPanel>
+      ) : (
+        <></>
+      )}
       <div
         ref={containerRef}
         id="game-field"

@@ -6,9 +6,9 @@ const Player = ({ playerPos, setPlayerPos }) => {
     const handleKeyDown = (event) => {
       setPlayerPos((prevPos) => {
         if (event.key === "ArrowLeft") {
-          return { x: prevPos.x - 10, y: prevPos.y };
+          return { x: prevPos.x - 30, y: prevPos.y };
         } else if (event.key === "ArrowRight") {
-          return { x: prevPos.x + 10, y: prevPos.y };
+          return { x: prevPos.x + 30, y: prevPos.y };
         }
         return prevPos; // unchanged if other keys
       });
@@ -22,7 +22,6 @@ const Player = ({ playerPos, setPlayerPos }) => {
     };
   }, []);
 
-  console.log("player");
 
   return (
     <>
