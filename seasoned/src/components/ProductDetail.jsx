@@ -2,28 +2,20 @@ import { useState, useEffect } from "react";
 import { Container, Button, Row, Col, Card } from "react-bootstrap";
 import CustomNavbar from "./CustomNavbar/CustomNavbar";
 import { useParams } from "react-router";
-const ProductDetail = () => {
+const ProductDetail = ({ products }) => {
   // Why fetching here again?
   // Even though it might be better performance-wise to just lift the state up
   // passing an object with all the data, this would fail if the user tries to reach
   // for the page by typing the specific URL, without reaching the home page first
-
   const { id } = useParams();
-  const [productData, setProductData] = useState();
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await fetch(`https://fakestoreapi.com/products/${id}`);
-      const data = await response.json();
-      setProductData(data);
-    };
-    fetchProducts();
-    console.log(productData);
-  }, []);
+  // const [productData, setProductData] = useState();
 
-  if (!productData) {
+  if (!products || products.length === 0) {
     return <p>Loading...</p>;
   }
+    console.log(products);
 
+  const productData = products[id-1];
   return (
     <>
       <CustomNavbar></CustomNavbar>

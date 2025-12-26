@@ -1,8 +1,8 @@
 import "./CustomNavbar.css";
 import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-
-const CustomNavbar = ({ products }) => {
+import Cart from "../Cart";
+const CustomNavbar = ({ products, cart, setCart }) => {
   const [searchText, setSearchText] = useState("");
   const [warning, setWarning] = useState("");
   const navigate = useNavigate();
@@ -18,24 +18,22 @@ const CustomNavbar = ({ products }) => {
   const checkText = () => {
     if (searchText.trim() === "") {
       setWarning("Field cannot be empty!");
+      return false;
     } else {
       setWarning("");
+      return true;
     }
   };
 
   const search = (event) => {
     event.preventDefault();
-    checkText();
-    if (warning !== "") {
-      return;
-    } else {
-      navigate(`/search?q=${encodeURIComponent(searchText)}`);
+    if (checkText()) {
+      navigate(`/search?q=${encodeURIComponent(searchText)}`, {
+        state: {
+          products: products,
+        },
+      });
     }
-
-    products.filter((prod) => {
-      prod.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        prod.description.toLowerCase().includes(searchText.toLowerCase());
-    });
   };
   return (
     <>
@@ -51,7 +49,10 @@ const CustomNavbar = ({ products }) => {
             <Link to={"/contacts"}>Contacts</Link>
           </li>
           <li>
-            <Link to={"/admin-login"}>Admin Login</Link>
+            <Link to={"/login"}>Login</Link>
+          </li>
+          <li>
+            Not a user yet? <Link to={"/register"}>Sign In</Link>
           </li>
 
           <li>
@@ -63,7 +64,9 @@ const CustomNavbar = ({ products }) => {
                   setSearchText(event.target.value);
                 }}
                 onBlur={checkText}
-                onFocus={() => {setWarning("")}}
+                onFocus={() => {
+                  setWarning("");
+                }}
               />
               {warning && <p className="warning">{warning}</p>}
               <button type="submit" id="search-button">
@@ -72,6 +75,7 @@ const CustomNavbar = ({ products }) => {
             </form>
           </li>
         </ul>
+        <Cart cart={cart} setCart={setCart}></Cart>
       </nav>
     </>
   );

@@ -4,11 +4,12 @@ import { mulberry32, remap } from "../../utils/mathUtils.js";
 import Player from "../Player/Player.jsx";
 import "./GameField.css";
 import ControlPanel from "../ControlPanel/ControlPanel.jsx";
+import { Link } from "react-router";
 
-const GameField = () => {
+const GameField = ({ products, setProducts, setCart }) => {
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [products, setProducts] = useState([]);
+  // const [products, setProducts] = useState([]);
   const [gameMode, setGameMode] = useState(false);
   const [positions, setPositions] = useState({});
   const [sizes, setSizes] = useState({});
@@ -20,7 +21,7 @@ const GameField = () => {
     y: containerSize.height - 1,
   });
 
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(5);
   const [highScore, setHighScore] = useState(0);
 
   const updatePosition = (id, pos) => {
@@ -35,16 +36,6 @@ const GameField = () => {
       y: containerSize.height - 50, // give the player some height
     });
   }, [containerSize]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await fetch("https://fakestoreapi.com/products");
-      const data = await response.json();
-      setProducts(data);
-    };
-
-    fetchProducts();
-  }, []);
 
   const getCardSize = (price) => {
     let remappedValue;
@@ -330,7 +321,8 @@ const GameField = () => {
             size={sizes[prod.id]}
             prod={prod}
             gameMode={gameMode}
-          />
+            setCart={setCart}
+          ></ProductCard>
         ))}
       </div>
       {gameMode ? <hr></hr> : <></>}
