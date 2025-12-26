@@ -1,40 +1,33 @@
 import "./Player.css";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 const Player = ({ playerPos, setPlayerPos }) => {
   useEffect(() => {
     const handleKeyDown = (event) => {
       setPlayerPos((prevPos) => {
+        const STEP = 30;
+
         if (event.key === "ArrowLeft") {
-          return { x: prevPos.x - 30, y: prevPos.y };
+          return { x: prevPos.x - STEP, y: prevPos.y };
         } else if (event.key === "ArrowRight") {
-          return { x: prevPos.x + 30, y: prevPos.y };
+          return { x: prevPos.x + STEP, y: prevPos.y };
         }
-        return prevPos; // unchanged if other keys
+        return prevPos;
       });
     };
 
     window.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup on unmount
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setPlayerPos]);
 
   return (
-    <>
-      <div
-        id="player"
-        style={{
-          "--player-x": `${playerPos.x}px`,
-          "--player-y": `${playerPos.y}px`,
-        }}
-      >
-        hello
-      </div>
-    </>
+    <div
+      id="player"
+      style={{
+        "--player-x": `${playerPos.x}px`,
+        "--player-y": `${playerPos.y}px`,
+      }}
+    />
   );
 };
 

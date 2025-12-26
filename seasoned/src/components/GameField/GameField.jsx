@@ -4,36 +4,85 @@ import { mulberry32, remap } from "../../utils/mathUtils.js";
 import Player from "../Player/Player.jsx";
 import "./GameField.css";
 import ControlPanel from "../ControlPanel/ControlPanel.jsx";
-import { Link } from "react-router";
+import { Form } from "react-bootstrap";
 
-const GameField = ({ products, setProducts, setCart }) => {
+const PLAYER_WIDTH = 50;
+const PLAYER_HEIGHT = 10;
+
+const GameField = ({
+  products,
+  setProducts,
+  setCart,
+  filterPrice,
+  setFilterPrice,
+}) => {
   const containerRef = useRef(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  // const [products, setProducts] = useState([]);
+
+  const [containerSize, setContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
+
   const [gameMode, setGameMode] = useState(false);
   const [positions, setPositions] = useState({});
   const [sizes, setSizes] = useState({});
   const [score, setScore] = useState(0);
-  const [pause, setPause] = useState(false);
   const [gameOver, setGameOver] = useState(false);
-  const [playerPos, setPlayerPos] = useState({
-    x: containerSize.width / 2,
-    y: containerSize.height - 1,
-  });
+  const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 });
+  const [speed, setSpeed] = useState(1);
 
-  const [speed, setSpeed] = useState(5);
-  const [highScore, setHighScore] = useState(0);
+  const positionsRef = useRef({});
+  const sizesRef = useRef({});
+  const playerPosRef = useRef(playerPos);
+  const speedRef = useRef(speed);
+  const gameOverRef = useRef(gameOver);
 
-  const updatePosition = (id, pos) => {
-    setPositions((prev) => ({ ...prev, [id]: pos }));
-  };
+  const filteredProducts = products.filter(
+    (p) => p.price >= filterPrice[0] / 100 && p.price <= filterPrice[1] / 100
+  );
+  
+  useEffect(() => {
+    positionsRef.current = positions;
+  }, [positions]);
+
+  useEffect(() => {
+    sizesRef.current = sizes;
+  }, [sizes]);
+
+  useEffect(() => {
+    playerPosRef.current = playerPos;
+  }, [playerPos]);
+
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
+
+  useEffect(() => {
+    gameOverRef.current = gameOver;
+  }, [gameOver]);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerSize({
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   useEffect(() => {
     if (containerSize.width === 0 || containerSize.height === 0) return;
 
     setPlayerPos({
-      x: containerSize.width / 2,
-      y: containerSize.height - 50, // give the player some height
+      x: containerSize.width / 2 - PLAYER_WIDTH / 2,
+      y: containerSize.height - PLAYER_HEIGHT - 5,
     });
   }, [containerSize]);
 
@@ -41,20 +90,27 @@ const GameField = ({ products, setProducts, setCart }) => {
     let remappedValue;
     if (price < 50) {
       remappedValue = remap(price, 0, 50, 150, 300);
-    } else if (price >= 50 && price <= 400) {
+    } else if (price <= 400) {
       remappedValue = remap(price, 50, 400, 300, 400);
     } else {
       remappedValue = 500;
     }
-    return { height: remappedValue * 0.6, width: remappedValue * 0.4 };
+    return {
+      height: remappedValue * 0.3,
+      width: remappedValue * 0.2,
+    };
   };
 
   const updateSize = (id, size) => {
-    setSizes((prev) => ({ ...prev, [id]: size }));
+    setSizes((prev) => {
+      const next = { ...prev, [id]: size };
+      sizesRef.current = next;
+      return next;
+    });
   };
 
   const updateCardSizes = () => {
-    products.forEach((prod) => {
+    filteredProducts.forEach((prod) => {
       updateSize(prod.id, getCardSize(prod.price));
     });
   };
@@ -63,35 +119,22 @@ const GameField = ({ products, setProducts, setCart }) => {
     updateCardSizes();
   }, [products]);
 
-  // Measure container size and update on resize
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setContainerSize({ width: rect.width, height: rect.height });
-      }
-    };
-
-    updateSize();
-    // window.addEventListener("resize", updateSize);
-
-    // return () => window.removeEventListener("resize", updateSize);
-  }, []);
-
-  const backgroundURL = gameMode
-    ? "https://source.unsplash.com/random/1080x1920/?nature"
-    : "";
-
   const generateRandomPositions = (element, maxHeight, maxWidth) => {
+    const size = sizesRef.current[element.id];
+    if (!size) return { x: 0, y: 0 };
+
     const x = mulberry32(element.id)() * Math.random();
     const y = mulberry32(element.id + 1)() * Math.random();
-    const posX = Math.floor(x * maxWidth - sizes[element.id].width);
-    const posY = Math.floor(y * maxHeight - sizes[element.id].height);
 
-    return { x: posX, y: posY };
+    const rawX = x * maxWidth;
+    const rawY = y * maxHeight;
+
+    const posX = Math.max(0, Math.min(rawX, maxWidth - size.width));
+    const posY = Math.max(0, Math.min(rawY, maxHeight - size.height));
+
+    return { x: Math.floor(posX), y: Math.floor(posY) };
   };
 
-  // Collision detection (AABB)
   const isColliding = (posA, sizeA, posB, sizeB) => {
     if (!posA || !posB || !sizeA || !sizeB) return false;
     return !(
@@ -152,7 +195,6 @@ const GameField = ({ products, setProducts, setCart }) => {
               posB.y += posA.y < posB.y ? shiftY : -shiftY;
             }
 
-            // Clamp positions inside the game field bounds
             posA.x = clamp(posA.x, 0, maxWidth - sizes[keyA].width);
             posA.y = clamp(posA.y, 0, maxHeight - sizes[keyA].height);
             posB.x = clamp(posB.x, 0, maxWidth - sizes[keyB].width);
@@ -167,27 +209,16 @@ const GameField = ({ products, setProducts, setCart }) => {
       iteration++;
     }
 
-    if (iteration === maxIterations) {
-      console.warn("Max collision resolution iterations reached");
-    }
-
     return finalPositions;
   };
 
   const initializeGame = () => {
-    if (Object.keys(sizes).length === 0) {
-      // NOTE FOR REFACTORING STAGE - CHECK BETTER LOGGING OPTIONS THAT ALLOWS FOR DIFFERENT VERBOSITIES
-      console.log("Waiting for sizes to initialize positions...");
-      return;
-    }
+    if (Object.keys(sizesRef.current).length === 0) return;
 
     const maxWidth = containerSize.width;
     const maxHeight = containerSize.height;
 
-    if (maxWidth === 0 || maxHeight === 0) {
-      // container size not ready yet
-      return;
-    }
+    if (maxWidth === 0 || maxHeight === 0) return;
 
     const initialPositions = {};
     products.forEach((product) => {
@@ -197,29 +228,40 @@ const GameField = ({ products, setProducts, setCart }) => {
         maxWidth
       );
     });
+
     const finalPositions = resolveCollisions(
       initialPositions,
-      sizes,
+      sizesRef.current,
       maxWidth,
       maxHeight
     );
-    setPositions(finalPositions);
-  };
-  const move = (amount) => {
-    products.forEach((prod) => {
-      const currentPos = positions[prod.id];
-      const size = sizes[prod.id];
 
-      // If position or size not ready yet, skip this product
+    positionsRef.current = finalPositions;
+    setPositions(finalPositions);
+    setScore(0);
+    setGameOver(false);
+  };
+
+  const moveAll = () => {
+    const currentPositions = { ...positionsRef.current };
+    const currentSizes = sizesRef.current;
+    const currentSpeed = speedRef.current;
+
+    filteredProducts.forEach((prod) => {
+      const currentPos = currentPositions[prod.id];
+      const size = currentSizes[prod.id];
       if (!currentPos || !size) return;
 
       const newPos = {
         x: currentPos.x,
-        y: currentPos.y + amount * speed,
+        y: currentPos.y + 1 * currentSpeed,
       };
 
-      updatePosition(prod.id, newPos);
+      currentPositions[prod.id] = newPos;
     });
+
+    positionsRef.current = currentPositions;
+    setPositions(currentPositions);
   };
 
   useEffect(() => {
@@ -228,93 +270,102 @@ const GameField = ({ products, setProducts, setCart }) => {
     let animationFrameId;
 
     const loop = () => {
-      move(1); // move 5px per frame
+      if (gameOverRef.current) return;
 
-      products.forEach((prod) => {
-        if (!sizes[prod.id] || !positions[prod.id]) return;
+      moveAll();
 
-        // collision with player
-        if (
-          isColliding(
-            playerPos,
-            { x: 50, y: 10 },
-            positions[prod.id],
-            sizes[prod.id]
-          )
-        ) {
-          console.log("PLAYER COLLISION");
+      const currentPositions = positionsRef.current;
+      const currentSizes = sizesRef.current;
+      const currentPlayerPos = playerPosRef.current;
+
+      const playerHitboxPos = {
+        x: currentPlayerPos.x,
+        y: currentPlayerPos.y,
+      };
+      const playerHitboxSize = {
+        width: PLAYER_WIDTH,
+        height: PLAYER_HEIGHT,
+      };
+
+      let collisionThisFrame = false;
+
+      filteredProducts.forEach((prod) => {
+        const prodPos = currentPositions[prod.id];
+        const prodSize = currentSizes[prod.id];
+        if (!prodPos || !prodSize) return;
+
+        if (isColliding(playerHitboxPos, playerHitboxSize, prodPos, prodSize)) {
+          collisionThisFrame = true;
         }
 
-        // respawn if off screen
-        if (positions[prod.id].y >= containerSize.height) {
+        if (prodPos.y >= containerSize.height - prodSize.height) {
           let attempts = 0;
+          let newPos;
+          const maxAttempts = 2000;
+
           do {
-            updatePosition(prod.id, {
-              x: Math.random() * containerSize.width,
-              y: (Math.random() * containerSize.width) / 3,
-            });
+            const randomX =
+              Math.random() * (containerSize.width - prodSize.width);
+            const randomY =
+              Math.random() * (containerSize.height / 3 - prodSize.height);
+
+            newPos = {
+              x: Math.max(0, randomX),
+              y: Math.max(0, randomY),
+            };
+
+            currentPositions[prod.id] = newPos;
+
             attempts++;
-            console.log("resolve");
           } while (
-            // check against ALL other products
-            products.some(
-              (p) =>
-                p.id !== prod.id &&
-                isColliding(
-                  positions[prod.id],
-                  sizes[prod.id],
-                  positions[p.id],
-                  sizes[p.id]
-                )
-            ) &&
-            attempts < 2000
+            filteredProducts.some((p) => {
+              if (p.id === prod.id) return false;
+              const otherPos = currentPositions[p.id];
+              const otherSize = currentSizes[p.id];
+              if (!otherPos || !otherSize) return false;
+              return isColliding(newPos, prodSize, otherPos, otherSize);
+            }) &&
+            attempts < maxAttempts
           );
+
+          positionsRef.current = currentPositions;
+          setPositions({ ...currentPositions });
 
           setScore((prev) => prev + 1);
         }
       });
+
+      if (collisionThisFrame) {
+        setGameOver(true);
+        gameOverRef.current = true;
+        return;
+      }
 
       animationFrameId = requestAnimationFrame(loop);
     };
 
     animationFrameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [
-    gameMode,
-    products,
-    positions,
-    sizes,
-    containerSize,
-    playerPos,
-    move,
-    updatePosition,
-    setScore,
-  ]);
+  }, [gameMode, filterPrice, containerSize]);
 
   useEffect(() => {
-    if (gameMode && Object.keys(sizes).length === products.length) {
+    if (gameMode && Object.keys(sizes).length === filteredProducts.length) {
       initializeGame();
     }
-  }, [gameMode, sizes, containerSize]); // add containerSize so positions update when size changes
-
+  }, [gameMode, sizes, containerSize, products]);
+  console.log("RENDER GAMEFIELD");
   return (
-    <>
-      {gameMode ? (
-        <ControlPanel
-          score={score}
-          speed={speed}
-          setSpeed={setSpeed}
-        ></ControlPanel>
-      ) : (
-        <></>
+    <div className={gameMode ? "no-scroll game-mode-layout" : ""}>
+      {gameMode && (
+        <ControlPanel score={score} speed={speed} setSpeed={setSpeed} />
       )}
+
       <div
         ref={containerRef}
         id="game-field"
         className={gameMode ? "game-display" : "product-display"}
-        style={{ backgroundImage: `url(${backgroundURL})` }}
       >
-        {products.map((prod) => (
+        {filteredProducts.map((prod) => (
           <ProductCard
             key={prod.id}
             position={positions[prod.id]}
@@ -322,24 +373,24 @@ const GameField = ({ products, setProducts, setCart }) => {
             prod={prod}
             gameMode={gameMode}
             setCart={setCart}
-          ></ProductCard>
+          />
         ))}
+        {gameMode && (
+          <Player playerPos={playerPos} setPlayerPos={setPlayerPos} />
+        )}
       </div>
-      {gameMode ? <hr></hr> : <></>}
-      {gameMode ? <br></br> : <></>}
+
       <button
         onClick={() => {
+          if (!gameMode) initializeGame();
           setGameMode(!gameMode);
         }}
       >
         {gameMode ? "Product Mode" : "Game Mode"}
       </button>
-      {gameMode ? (
-        <Player playerPos={playerPos} setPlayerPos={setPlayerPos}></Player>
-      ) : (
-        ""
-      )}
-    </>
+
+      {gameOver && gameMode && <h2>GAME OVER</h2>}
+    </div>
   );
 };
 

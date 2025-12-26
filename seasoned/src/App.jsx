@@ -11,8 +11,10 @@ import SearchResult from "./components/SearchResult";
 import Register from "./components/Register";
 import Contacts from "./components/Contacts";
 import Login from "./components/Login";
+import PriceFilter from "./components/PriceFilter";
 
 function Home({ products, setProducts, cart, setCart }) {
+  const [filterPrice, setFilterPrice] = useState([795, 99900]);
   return (
     <>
       <CustomNavbar
@@ -21,10 +23,16 @@ function Home({ products, setProducts, cart, setCart }) {
         cart={cart}
         setCart={setCart}
       ></CustomNavbar>
+      <PriceFilter
+        filterPrice={filterPrice}
+        setFilterPrice={setFilterPrice}
+      ></PriceFilter>
       <GameField
         products={products}
         setProducts={setProducts}
         setCart={setCart}
+        filterPrice={filterPrice}
+        setFilterPrice={setFilterPrice}
       ></GameField>
     </>
   );
@@ -113,7 +121,7 @@ function App() {
             <Home
               products={products}
               setProducts={setProducts}
-              cart = {cart}
+              cart={cart}
               setCart={setCart}
             />
           }

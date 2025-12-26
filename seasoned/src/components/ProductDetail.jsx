@@ -13,7 +13,6 @@ const ProductDetail = ({ products }) => {
   if (!products || products.length === 0) {
     return <p>Loading...</p>;
   }
-    console.log(products);
 
   const productData = products[id-1];
   return (

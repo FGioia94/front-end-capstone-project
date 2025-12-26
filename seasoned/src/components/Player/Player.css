@@ -2,6 +2,18 @@
   position: absolute;
   left: var(--player-x);
   top: var(--player-y);
+
   width: 50px;
+  height: 10px;
+
   background-color: orange;
+
+  padding: 0;
+  margin: 0;
+  border: none;
+
+  box-sizing: border-box;
+
+  font-size: 0;      /* IMPORTANTISSIMO */
+  line-height: 0;    /* IMPORTANTISSIMO */
 }

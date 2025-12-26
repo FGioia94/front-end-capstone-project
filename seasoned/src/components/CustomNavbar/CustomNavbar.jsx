@@ -1,7 +1,8 @@
 import "./CustomNavbar.css";
 import { Link, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-import Cart from "../Cart";
+import Cart from "../Cart/Cart";
+
 const CustomNavbar = ({ products, cart, setCart }) => {
   const [searchText, setSearchText] = useState("");
   const [warning, setWarning] = useState("");
