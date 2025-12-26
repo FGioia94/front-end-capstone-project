@@ -1,23 +1,62 @@
 import "./Player.css";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Player = ({ playerPos, setPlayerPos }) => {
+  const touchStartX = useRef(null);
+
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      setPlayerPos((prevPos) => {
-        const STEP = 30;
+    const isMobile = window.innerWidth <= 768;
 
-        if (event.key === "ArrowLeft") {
-          return { x: prevPos.x - STEP, y: prevPos.y };
-        } else if (event.key === "ArrowRight") {
-          return { x: prevPos.x + STEP, y: prevPos.y };
-        }
-        return prevPos;
-      });
-    };
+    if (isMobile) {
+      // Touch/drag control for mobile
+      const handleTouchStart = (e) => {
+        touchStartX.current = e.touches[0].clientX;
+      };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+      const handleTouchMove = (e) => {
+        if (touchStartX.current === null) return;
+        const currentX = e.touches[0].clientX;
+        const diffX = currentX - touchStartX.current;
+
+        setPlayerPos((prevPos) => ({
+          x: prevPos.x + diffX * 0.5,
+          y: prevPos.y,
+        }));
+
+        touchStartX.current = currentX;
+      };
+
+      const handleTouchEnd = () => {
+        touchStartX.current = null;
+      };
+
+      document.addEventListener("touchstart", handleTouchStart);
+      document.addEventListener("touchmove", handleTouchMove);
+      document.addEventListener("touchend", handleTouchEnd);
+
+      return () => {
+        document.removeEventListener("touchstart", handleTouchStart);
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+    } else {
+      // Arrow key control for desktop
+      const handleKeyDown = (event) => {
+        setPlayerPos((prevPos) => {
+          const STEP = 30;
+
+          if (event.key === "ArrowLeft") {
+            return { x: prevPos.x - STEP, y: prevPos.y };
+          } else if (event.key === "ArrowRight") {
+            return { x: prevPos.x + STEP, y: prevPos.y };
+          }
+          return prevPos;
+        });
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
   }, [setPlayerPos]);
 
   return (

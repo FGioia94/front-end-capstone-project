@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Container, Button, Row, Col, Card } from "react-bootstrap";
 import CustomNavbar from "./CustomNavbar/CustomNavbar";
 import { useParams } from "react-router";
-const ProductDetail = ({ products }) => {
+const ProductDetail = ({ products, cart, setCart, addToCart }) => {
   // Why fetching here again?
   // Even though it might be better performance-wise to just lift the state up
   // passing an object with all the data, this would fail if the user tries to reach
@@ -15,9 +15,13 @@ const ProductDetail = ({ products }) => {
   }
 
   const productData = products[id-1];
+  const handleAdd = () => {
+    if (addToCart) addToCart(productData);
+  };
+
   return (
     <>
-      <CustomNavbar></CustomNavbar>
+      <CustomNavbar products={products} cart={cart} setCart={setCart} />
       <Container className="mt-4">
         <Row className="justify-content-center">
           <Col md={6}>
@@ -32,8 +36,10 @@ const ProductDetail = ({ products }) => {
                   <h2>{productData.title}</h2>
                 </Card.Title>
                 <Card.Text>{productData.description}</Card.Text>
-                <Card.Text>{productData.price}</Card.Text>
-                <Button variant="primary">Add to Cart</Button>
+                <Card.Text>${productData.price}</Card.Text>
+                <Button variant="primary" onClick={handleAdd}>
+                  Add to Cart
+                </Button>
               </Card.Body>
             </Card>
           </Col>

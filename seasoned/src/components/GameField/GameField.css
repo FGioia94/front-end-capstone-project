@@ -1,45 +1,88 @@
-/* ---------------------------------------------------
-   GAME FIELD (shared)
---------------------------------------------------- */
+﻿/* Cleaned GameField CSS: consistent sizing, overlays, and mobile rules */
+
+/* GAME FIELD (shared) */
 #game-field {
   position: relative;
-  width: 100%;        /* FIX: niente 70% */
-  height: 85vh;       /* FIX: dimensione unica */
-  margin: 0;          /* FIX: niente centering */
-  padding: 0;         /* FIX: niente padding */
-  border: none;       /* FIX: niente border */
-  border-radius: 0;   /* FIX: niente radius */
+  width: 100%;
+  height: 85vh;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   background-size: cover;
   background-position: center;
 }
 
-/* ---------------------------------------------------
-   GAME MODE FIELD
---------------------------------------------------- */
+/* GAME MODE FIELD */
 .game-display#game-field {
-  /* NON aggiungere nulla qui */
+  /* subtle veil + background image (var --game-bg set inline) */
+  background-image: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0.15)), var(--game-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-/* ---------------------------------------------------
-   PRODUCT MODE (store view)
---------------------------------------------------- */
+/* PRODUCT MODE (store view) */
 .product-display {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20vw, 10fr));
-  gap: 2rem;
-  padding: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 12px;
   overflow-y: auto;
-  height: 100vh;
+  height: 100%;
 }
 
+@media (max-width: 768px) {
+  #game-field {
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    height: 90vh;
+  }
+  .product-display {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    padding: 8px;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.product-display .product-card { animation: fadeInUp 360ms cubic-bezier(.2,.9,.2,1) both; }
+
+/* skeleton */
+.product-card.skeleton {
+  height: 280px;
+  background: linear-gradient(90deg,#2b2f35,#232528,#2b2f35);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 0;
+}
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+/* When product mode, let container expand */
+#game-field.product-display { height: auto; max-height: none; overflow: visible; }
+
+/* BASE CARD (product mode) */
 .product-display .product-card {
-  position: static;
+  position: relative; /* allow overlay */
   height: auto;
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  padding: 8px;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.9);
+  border-radius: 0;
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: box-shadow 140ms ease, transform 140ms ease;
 }
 
 .product-display .product-card .card-body {
@@ -47,29 +90,41 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  padding-top: 2rem;
+  padding: 12px;
+  text-align: center;
 }
 
-.product-display .product-card img {
-  width: 50%;
-  padding: 2rem;
+.product-display .product-card img,
+.product-display .product-card .card-img,
+.product-display .product-card .card-img-top {
+  display: block;
+  max-width: 180px;
+  width: 100%;
   height: auto;
+  object-fit: contain;
+  padding: 8px 0;
 }
 
-/* ---------------------------------------------------
-   BASE CARD (shared)
---------------------------------------------------- */
+/* ensure image/content stacking is under overlay */
+.product-display .product-card img,
+.product-display .product-card .card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* BASE CARD (shared) */
 .product-card {
-  width: 25rem;
-  border: 8px solid black;
-  border-radius: 24px;
-  background-color: transparent;
+  width: 100%;
+  max-width: 360px;
+  border: none;
+  border-radius: 0;
+  background-color: rgba(255,255,255,0.95);
   box-sizing: border-box;
+  transition: transform 180ms ease, box-shadow 180ms ease;
 }
+.product-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
 
-/* ---------------------------------------------------
-   GAME MODE CARD (absolute)
---------------------------------------------------- */
+/* GAME MODE CARD (absolute) */
 .game-display .product-card {
   position: absolute;
   left: var(--card-x);
@@ -80,45 +135,39 @@
   margin: 0;
   border: none;
   border-radius: 0;
-  background: transparent;
+  background: rgba(255,255,255,0.95);
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: box-shadow 120ms ease, transform 120ms ease;
 }
 
 .game-display .product-card img {
+  display: block;
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
 
-/* ---------------------------------------------------
-   PREVENT TEXT / IMAGE SCALING ISSUES
---------------------------------------------------- */
-* {
-  box-sizing: border-box;
+/* overlay that tints the card red based on --danger (0..1) */
+.product-card::after {
+  content: ;
+ pointer-events: none;
+ position: absolute;
+ inset: 0;
+  background: rgba(255,0,0,1);
+  mix-blend-mode: normal;
+  opacity: var(--danger, 0);
+  z-index: 3;
+ transition: background 120ms linear, opacity 120ms linear;
 }
 
-/* ---------------------------------------------------
-   DISABLE SCROLL ONLY IN GAME MODE
---------------------------------------------------- */
-.no-scroll {
-  overflow: hidden;
-  height: 100vh;
-}
+/* Prevent scaling/text issues */
+* { box-sizing: border-box; }
 
-/* ---------------------------------------------------
-   GAME MODE LAYOUT WRAPPER
---------------------------------------------------- */
-.game-mode-layout {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  /* FIX: rimosso align-items:center */
-}
+/* Disable scroll only in game mode */
+.no-scroll { overflow: hidden; height: 100vh; }
 
-.game-display .product-card {
-  border: 4px solid black;     /* bordo visibile */
-  border-radius: 12px;         /* opzionale */
-  background: white;           /* opzionale */
-}
+/* Game layout wrapper */
+.game-mode-layout { display:flex; flex-direction:column; width:100%; height:100vh; overflow:hidden; }

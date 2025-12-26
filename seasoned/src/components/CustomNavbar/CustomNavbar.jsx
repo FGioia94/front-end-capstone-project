@@ -44,16 +44,7 @@ const CustomNavbar = ({ products, cart, setCart }) => {
             <Link to={"/"}>Home</Link>
           </li>
           <li>
-            <Link to={"/about"}>About</Link>
-          </li>
-          <li>
             <Link to={"/contacts"}>Contacts</Link>
-          </li>
-          <li>
-            <Link to={"/login"}>Login</Link>
-          </li>
-          <li>
-            Not a user yet? <Link to={"/register"}>Sign In</Link>
           </li>
 
           <li>
@@ -75,8 +66,14 @@ const CustomNavbar = ({ products, cart, setCart }) => {
               </button>
             </form>
           </li>
+
+          <li className="nav-right">
+            <Link to={"/login"}>Login</Link>
+            <span style={{ margin: "0 0.5rem" }}>|</span>
+            Not a user yet? <Link to={"/register"}>Sign In</Link>
+            <Cart cart={cart} setCart={setCart} compact={true} />
+          </li>
         </ul>
-        <Cart cart={cart} setCart={setCart}></Cart>
       </nav>
     </>
   );

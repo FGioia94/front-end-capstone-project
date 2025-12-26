@@ -15,6 +15,7 @@ const GameField = ({
   setCart,
   filterPrice,
   setFilterPrice,
+  addToCart,
 }) => {
   const containerRef = useRef(null);
 
@@ -30,6 +31,8 @@ const GameField = ({
   const [gameOver, setGameOver] = useState(false);
   const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 });
   const [speed, setSpeed] = useState(1);
+  const [backgroundImage, setBackgroundImage] = useState("");
+  const [backgroundImageLoaded, setBackgroundImageLoaded] = useState(false);
 
   const positionsRef = useRef({});
   const sizesRef = useRef({});
@@ -40,6 +43,8 @@ const GameField = ({
   const filteredProducts = products.filter(
     (p) => p.price >= filterPrice[0] / 100 && p.price <= filterPrice[1] / 100
   );
+
+  const loading = products.length === 0;
   
   useEffect(() => {
     positionsRef.current = positions;
@@ -62,20 +67,62 @@ const GameField = ({
   }, [gameOver]);
 
   useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setContainerSize({
-          width: rect.width,
-          height: rect.height,
-        });
+    // Fetch a random abstract image from Loremflickr
+    const fetchBackgroundImage = async () => {
+      try {
+        // Fetch nature/landscape images
+        const imageUrl = `https://loremflickr.com/1920/1080/nature,landscape?${Math.random()}`;
+        // Preload image to ensure it's loaded before setting state
+        const img = new Image();
+        img.onload = () => {
+          setBackgroundImage(`url('${imageUrl}')`);
+          setBackgroundImageLoaded(true);
+        };
+        img.onerror = () => {
+          // Fallback if image fails to load
+          setBackgroundImage("linear-gradient(180deg, rgba(12,18,26,0.6), rgba(6,10,14,0.6))");
+          setBackgroundImageLoaded(true);
+        };
+        img.src = imageUrl;
+      } catch (error) {
+        console.error("Failed to fetch background image:", error);
+        setBackgroundImage("linear-gradient(180deg, rgba(12,18,26,0.6), rgba(6,10,14,0.6))");
+        setBackgroundImageLoaded(true);
       }
     };
 
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    fetchBackgroundImage();
   }, []);
+
+  useEffect(() => {
+    // kept intentionally empty - resize handler is declared at top-level now
+  }, []);
+
+  // updateContainerSize is used in multiple places (initial measurement,
+  // on resize, and when switching modes) so keep it at component scope.
+  const updateContainerSize = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setContainerSize({
+        width: rect.width,
+        height: rect.height,
+      });
+    }
+  };
+
+  useEffect(() => {
+    updateContainerSize();
+    window.addEventListener("resize", updateContainerSize);
+    return () => window.removeEventListener("resize", updateContainerSize);
+  }, []);
+
+  // Recompute container size when switching between product/game mode so
+  // positioning uses the correct available area.
+  useEffect(() => {
+    // allow layout to settle (class changes may affect flow)
+    const t = setTimeout(() => updateContainerSize(), 0);
+    return () => clearTimeout(t);
+  }, [gameMode, filteredProducts.length]);
 
   useEffect(() => {
     if (containerSize.width === 0 || containerSize.height === 0) return;
@@ -95,9 +142,14 @@ const GameField = ({
     } else {
       remappedValue = 500;
     }
+    
+    // Minimal scaling on mobile
+    const isMobile = window.innerWidth <= 768;
+    const scale = isMobile ? 0.7 : 1;
+    
     return {
-      height: remappedValue * 0.3,
-      width: remappedValue * 0.2,
+      height: remappedValue * 0.3 * scale,
+      width: remappedValue * 0.2 * scale,
     };
   };
 
@@ -363,18 +415,46 @@ const GameField = ({
       <div
         ref={containerRef}
         id="game-field"
+        style={{ '--game-bg': backgroundImage }}
         className={gameMode ? "game-display" : "product-display"}
       >
-        {filteredProducts.map((prod) => (
-          <ProductCard
-            key={prod.id}
-            position={positions[prod.id]}
-            size={sizes[prod.id]}
-            prod={prod}
-            gameMode={gameMode}
-            setCart={setCart}
-          />
-        ))}
+        {loading && !gameMode ? (
+          // show skeletons while loading
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="product-card skeleton" />
+          ))
+        ) : (
+          filteredProducts.map((prod, i) => {
+            const pos = positions[prod.id];
+            const size = sizes[prod.id];
+            let danger = 0;
+            if (gameMode && pos && size && containerSize.width && containerSize.height) {
+              const cardCenterX = pos.x + (size.width || 0) / 2;
+              const cardCenterY = pos.y + (size.height || 0) / 2;
+              const playerCenterX = playerPos.x + PLAYER_WIDTH / 2;
+              const playerCenterY = playerPos.y + PLAYER_HEIGHT / 2;
+              const dx = cardCenterX - playerCenterX;
+              const dy = cardCenterY - playerCenterY;
+              const dist = Math.hypot(dx, dy);
+              const maxDist = Math.hypot(containerSize.width, containerSize.height);
+              // danger grows as distance decreases; clamp 0..1
+              danger = Math.max(0, Math.min(1, 1 - dist / (maxDist * 0.5)));
+            }
+
+            return (
+              <ProductCard
+                key={prod.id}
+                position={positions[prod.id]}
+                size={sizes[prod.id]}
+                prod={prod}
+                gameMode={gameMode}
+                setCart={setCart}
+                addToCart={addToCart}
+                cardStyle={{ animationDelay: `${i * 60}ms`, "--danger": danger }}
+              />
+            );
+          })
+        )}
         {gameMode && (
           <Player playerPos={playerPos} setPlayerPos={setPlayerPos} />
         )}
@@ -385,8 +465,9 @@ const GameField = ({
           if (!gameMode) initializeGame();
           setGameMode(!gameMode);
         }}
+        disabled={!backgroundImageLoaded}
       >
-        {gameMode ? "Product Mode" : "Game Mode"}
+        {!backgroundImageLoaded ? "Loading background..." : gameMode ? "Product Mode" : "Game Mode"}
       </button>
 
       {gameOver && gameMode && <h2>GAME OVER</h2>}

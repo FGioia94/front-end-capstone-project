@@ -1,5 +1,4 @@
 import GameField from "./components/GameField/GameField";
-import "normalize.css";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar/CustomNavbar";
 import { BrowserRouter, Routes, Route, data } from "react-router";
@@ -11,10 +10,11 @@ import SearchResult from "./components/SearchResult";
 import Register from "./components/Register";
 import Contacts from "./components/Contacts";
 import Login from "./components/Login";
+import Checkout from "./components/Checkout";
 import PriceFilter from "./components/PriceFilter";
 
-function Home({ products, setProducts, cart, setCart }) {
-  const [filterPrice, setFilterPrice] = useState([795, 99900]);
+function Home({ products, setProducts, cart, setCart, addToCart }) {
+  const [filterPrice, setFilterPrice] = useState([795, 100000]);
   return (
     <>
       <CustomNavbar
@@ -33,6 +33,7 @@ function Home({ products, setProducts, cart, setCart }) {
         setCart={setCart}
         filterPrice={filterPrice}
         setFilterPrice={setFilterPrice}
+        addToCart={addToCart}
       ></GameField>
     </>
   );
@@ -112,6 +113,26 @@ function App() {
     fetchProducts();
   }, []);
 
+  const addToCart = (product) => {
+    const stored = sessionStorage.getItem("cart") || "[]";
+    const currentCart = JSON.parse(stored);
+    const existingItem = currentCart.find((item) => item.id === product.id);
+
+    let updatedCart;
+    if (existingItem) {
+      updatedCart = currentCart.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item
+      );
+    } else {
+      updatedCart = [...currentCart, { ...product, quantity: 1 }];
+    }
+
+    sessionStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCart(updatedCart);
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -123,20 +144,42 @@ function App() {
               setProducts={setProducts}
               cart={cart}
               setCart={setCart}
+              addToCart={addToCart}
             />
           }
         />
         <Route
           path="/contacts"
-          element={<ContactsPage setProducts={setProducts} cart={cart} />}
+          element={
+            <ContactsPage
+              products={products}
+              setProducts={setProducts}
+              cart={cart}
+              setCart={setCart}
+            />
+          }
         />
         <Route
           path="/login"
-          element={<LoginPage setProducts={setProducts} cart={cart} />}
+          element={
+            <LoginPage
+              products={products}
+              setProducts={setProducts}
+              cart={cart}
+              setCart={setCart}
+            />
+          }
         />
         <Route
           path="/register"
-          element={<RegisterPage setProducts={setProducts} cart={cart} />}
+          element={
+            <RegisterPage
+              products={products}
+              setProducts={setProducts}
+              cart={cart}
+              setCart={setCart}
+            />
+          }
         />
         <Route
           path="/product/:id"
@@ -145,9 +188,11 @@ function App() {
               products={products}
               setProducts={setProducts}
               cart={cart}
+              setCart={setCart}
+              addToCart={addToCart}
             />
           }
-        />{" "}
+        />
         <Route
           path="/search"
           element={
@@ -158,6 +203,10 @@ function App() {
               setCart={setCart}
             />
           }
+        />
+        <Route
+          path="/checkout"
+          element={<Checkout products={products} cart={cart} setCart={setCart} />}
         />
       </Routes>
     </BrowserRouter>

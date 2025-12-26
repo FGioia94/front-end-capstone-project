@@ -1,0 +1,49 @@
+/* Checkout page styles */
+.checkout-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.checkout-item .checkout-thumb {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.checkout-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.checkout-item .title {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.muted {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.quantity-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.summary-card .total-amount {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.checkout-item {
+  transition: box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+.checkout-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}

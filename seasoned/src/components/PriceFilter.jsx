@@ -19,7 +19,7 @@ const PriceFilter = ({ filterPrice, setFilterPrice }) => {
   };
   return (
     <>
-      <Form.Label>Min Price: {filterPrice[0] / 100}</Form.Label>
+      <Form.Label>Min Price: ${" "}{(filterPrice[0] / 100).toFixed(2)}</Form.Label>
       <Form.Range
         value={tempMin}
         min={795}
@@ -29,11 +29,11 @@ const PriceFilter = ({ filterPrice, setFilterPrice }) => {
         onMouseUp={commitMin}
       />
 
-      <Form.Label>Max Price: {filterPrice[1] / 100}</Form.Label>
+      <Form.Label>Max Price: ${" "}{(filterPrice[1] / 100).toFixed(2)}</Form.Label>
       <Form.Range
         value={tempMax}
         min={filterPrice[0]}
-        max={99900}
+        max={100000}
         step={1}
         onChange={handleMaxChange}
         onMouseUp={commitMax}
