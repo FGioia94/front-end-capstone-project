@@ -40,3 +40,48 @@
 .read-the-docs {
   color: #888;
 } */
+
+/* Admin Dark Mode */
+.admin-dark-mode {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 100%);
+  color: #e0e0e0;
+}
+
+.admin-dark-mode nav {
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+.admin-dark-mode nav a {
+  color: #a78bfa;
+}
+
+.admin-dark-mode nav a:hover {
+  color: #c4b5fd;
+}
+
+.admin-dark-mode .admin-badge {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  z-index: 1000;
+  text-transform: uppercase;
+}
+
+.admin-dark-mode .product-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.admin-dark-mode .product-card:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+}

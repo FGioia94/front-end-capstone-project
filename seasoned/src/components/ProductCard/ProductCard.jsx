@@ -14,7 +14,8 @@ const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, cardS
 
   if (gameMode) {
     return (
-      <div
+      <Link
+        to={`/product/${prod.id}`}
         className="product-card"
         style={{
           "--card-x": `${pos.x}px`,
@@ -25,7 +26,7 @@ const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, cardS
         }}
       >
         <img src={prod.image} alt={prod.title} />
-      </div>
+      </Link>
     );
   }
 

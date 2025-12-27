@@ -1,56 +1,39 @@
 import { useState } from "react";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { useUser } from "../context/UserContext";
 import { useNavigate, Link } from "react-router";
+import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const { login } = useUser();
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!email || !password) {
-      setError("Please fill all the fields");
+    if (!username.trim() || !password.trim()) {
+      setError("Please fill all fields");
       setSuccess("");
       return;
     }
 
-    const storedUser = localStorage.getItem(email);
-
-    if (storedUser === null) {
-      setError("User doesn't exist, please register first");
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
       setSuccess("");
       return;
     }
 
-    const userData = JSON.parse(storedUser);
-
-    if (userData.password !== password) {
-      setError("Wrong Password");
-      setSuccess("");
-      return;
-    }
-
-    // Login successful
-    sessionStorage.setItem("isLoggedIn", email);
-    sessionStorage.setItem("isAdmin", userData.isAdmin);
-
+    // Mock authentication - login as regular user
+    login(username, "user");
     setError("");
-    setSuccess(
-      `Logged in as ${userData.isAdmin ? "ADMIN" : "USER"}! Redirecting...`
-    );
+    setSuccess("Logged in successfully! Redirecting...");
 
     setTimeout(() => {
-      if (userData.isAdmin) {
-        navigate(`/admin-dashboard?user=${email}`);
-      } else {
-        navigate(`/dashboard?user=${email}`);
-      }
+      navigate("/");
     }, 1500);
   };
 
@@ -64,17 +47,17 @@ const Login = () => {
           {success && <Alert variant="success">{success}</Alert>}
 
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="emailField">
-              <Form.Label>Email</Form.Label>
+            <Form.Group className="mb-3" controlId="usernameField">
+              <Form.Label>Username</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </Form.Group>
 
-            <Form.Group className="mb-4" controlId="passwordField">
+            <Form.Group className="mb-3" controlId="passwordField">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"

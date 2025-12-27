@@ -1,9 +1,12 @@
 import ProductCard from "../ProductCard/ProductCard";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useUser } from "../../context/UserContext";
 import { mulberry32, remap } from "../../utils/mathUtils.js";
 import Player from "../Player/Player.jsx";
 import "./GameField.css";
 import ControlPanel from "../ControlPanel/ControlPanel.jsx";
+import SortControls from "../SortControls/SortControls.jsx";
+import AdminBackgroundPanel from "./AdminBackgroundPanel.jsx";
 import { Form } from "react-bootstrap";
 
 const PLAYER_WIDTH = 50;
@@ -17,7 +20,7 @@ const GameField = ({
   setFilterPrice,
   addToCart,
 }) => {
-  const containerRef = useRef(null);
+  const { isAdmin } = useUser();
 
   const [containerSize, setContainerSize] = useState({
     width: 0,
@@ -33,16 +36,52 @@ const GameField = ({
   const [speed, setSpeed] = useState(1);
   const [backgroundImage, setBackgroundImage] = useState("");
   const [backgroundImageLoaded, setBackgroundImageLoaded] = useState(false);
+  const [sortBy, setSortBy] = useState("default");
+  const [adminBgPalette, setAdminBgPalette] = useState("vibrant");
+  const [adminBgOpacity, setAdminBgOpacity] = useState(0.7);
 
+  // Only allow speed to be used if user is admin
+  const actualSpeed = isAdmin ? speed : 1;
+
+  const containerRef = useRef(null);
   const positionsRef = useRef({});
   const sizesRef = useRef({});
   const playerPosRef = useRef(playerPos);
-  const speedRef = useRef(speed);
+  const speedRef = useRef(actualSpeed);
   const gameOverRef = useRef(gameOver);
 
-  const filteredProducts = products.filter(
-    (p) => p.price >= filterPrice[0] / 100 && p.price <= filterPrice[1] / 100
-  );
+  // Create a safe setSpeed that only allows admins to change speed
+  const safeSetSpeed = (newSpeed) => {
+    if (isAdmin) {
+      setSpeed(newSpeed);
+    }
+  };
+
+  const filteredProducts = useMemo(() => {
+    let result = products.filter(
+      (p) => p.price >= filterPrice[0] / 100 && p.price <= filterPrice[1] / 100
+    );
+
+    // Apply sorting
+    switch (sortBy) {
+      case "name-asc":
+        result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "name-desc":
+        result = [...result].sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case "price-asc":
+        result = [...result].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        result = [...result].sort((a, b) => b.price - a.price);
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }, [products, filterPrice, sortBy]);
 
   const loading = products.length === 0;
   
@@ -67,32 +106,55 @@ const GameField = ({
   }, [gameOver]);
 
   useEffect(() => {
-    // Fetch a random abstract image from Loremflickr
-    const fetchBackgroundImage = async () => {
-      try {
-        // Fetch nature/landscape images
-        const imageUrl = `https://loremflickr.com/1920/1080/nature,landscape?${Math.random()}`;
-        // Preload image to ensure it's loaded before setting state
-        const img = new Image();
-        img.onload = () => {
-          setBackgroundImage(`url('${imageUrl}')`);
-          setBackgroundImageLoaded(true);
-        };
-        img.onerror = () => {
-          // Fallback if image fails to load
-          setBackgroundImage("linear-gradient(180deg, rgba(12,18,26,0.6), rgba(6,10,14,0.6))");
-          setBackgroundImageLoaded(true);
-        };
-        img.src = imageUrl;
-      } catch (error) {
-        console.error("Failed to fetch background image:", error);
-        setBackgroundImage("linear-gradient(180deg, rgba(12,18,26,0.6), rgba(6,10,14,0.6))");
-        setBackgroundImageLoaded(true);
-      }
+    // Generate an abstract gradient background (no external images)
+    // For admins in game mode, use custom palette; otherwise use random
+    const generateAdminGradient = (palette, opacity) => {
+      const palettes = {
+        vibrant: [
+          { h: 280, s: 85, l: 55 },
+          { h: 0, s: 90, l: 60 },
+          { h: 40, s: 95, l: 50 },
+        ],
+        cool: [
+          { h: 200, s: 85, l: 55 },
+          { h: 240, s: 80, l: 50 },
+          { h: 270, s: 75, l: 55 },
+        ],
+        warm: [
+          { h: 25, s: 90, l: 55 },
+          { h: 0, s: 85, l: 60 },
+          { h: 45, s: 88, l: 50 },
+        ],
+        sunset: [
+          { h: 340, s: 92, l: 60 },
+          { h: 20, s: 95, l: 55 },
+          { h: 50, s: 90, l: 50 },
+        ],
+        forest: [
+          { h: 120, s: 70, l: 40 },
+          { h: 150, s: 65, l: 45 },
+          { h: 90, s: 60, l: 35 },
+        ],
+      };
+
+      const colors = palettes[palette] || palettes.vibrant;
+      return `linear-gradient(135deg, hsla(${colors[0].h}, ${colors[0].s}%, ${colors[0].l}%, ${opacity}), hsla(${colors[1].h}, ${colors[1].s}%, ${colors[1].l}%, ${opacity}), hsla(${colors[2].h}, ${colors[2].s}%, ${colors[2].l}%, ${opacity}))`;
     };
 
-    fetchBackgroundImage();
-  }, []);
+    if (gameMode && isAdmin) {
+      const gradient = generateAdminGradient(adminBgPalette, adminBgOpacity);
+      setBackgroundImage(gradient);
+    } else {
+      // Use random gradient for non-admin or product mode
+      const randHue = () => Math.floor(Math.random() * 360);
+      const h1 = randHue();
+      const h2 = (h1 + 60 + Math.random() * 80) % 360;
+      const h3 = (h2 + 80 + Math.random() * 60) % 360;
+      const gradient = `linear-gradient(135deg, hsla(${h1}, 82%, 58%, 0.85), hsla(${h2}, 78%, 55%, 0.9), hsla(${h3}, 72%, 52%, 0.9))`;
+      setBackgroundImage(gradient);
+    }
+    setBackgroundImageLoaded(true);
+  }, [gameMode, isAdmin, adminBgPalette, adminBgOpacity]);
 
   useEffect(() => {
     // kept intentionally empty - resize handler is declared at top-level now
@@ -409,7 +471,22 @@ const GameField = ({
   return (
     <div className={gameMode ? "no-scroll game-mode-layout" : ""}>
       {gameMode && (
-        <ControlPanel score={score} speed={speed} setSpeed={setSpeed} />
+        <ControlPanel score={score} speed={speed} setSpeed={safeSetSpeed} gameOver={gameOver} />
+      )}
+
+      {gameMode && isAdmin && (
+        <AdminBackgroundPanel
+          palette={adminBgPalette}
+          setPalette={setAdminBgPalette}
+          opacity={adminBgOpacity}
+          setOpacity={setAdminBgOpacity}
+        />
+      )}
+
+      {!gameMode && (
+        <div className="product-controls">
+          <SortControls sortBy={sortBy} setSortBy={setSortBy} />
+        </div>
       )}
 
       <div
@@ -437,8 +514,15 @@ const GameField = ({
               const dy = cardCenterY - playerCenterY;
               const dist = Math.hypot(dx, dy);
               const maxDist = Math.hypot(containerSize.width, containerSize.height);
-              // danger grows as distance decreases; clamp 0..1
-              danger = Math.max(0, Math.min(1, 1 - dist / (maxDist * 0.5)));
+              // make threshold less sensitive: only when quite close
+              const threshold = maxDist * 0.18; // ~18% of diagonal
+              if (dist < threshold) {
+                // nonlinear falloff so danger ramps up quickly when very close
+                const raw = (threshold - dist) / threshold;
+                danger = Math.max(0, Math.min(1, Math.pow(raw, 1.4)));
+              } else {
+                danger = 0;
+              }
             }
 
             return (

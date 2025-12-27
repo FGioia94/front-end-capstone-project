@@ -1,29 +1,24 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router";
+import { useUser } from "../context/UserContext";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!email || !password || !confirm) {
+    if (!username || !password || !confirm) {
       setError("Please fill all the fields");
-      setSuccess("");
-      return;
-    }
-
-    if (localStorage.getItem(email) !== null) {
-      setError("User already exists");
       setSuccess("");
       return;
     }
@@ -34,41 +29,38 @@ const Register = () => {
       return;
     }
 
-    // Save user object instead of just password
-    const userData = {
-      password,
-      isAdmin, // <-- HERE
-    };
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setSuccess("");
+      return;
+    }
 
-    localStorage.setItem(email, JSON.stringify(userData));
-
+    // Register as regular user and redirect to login
     setError("");
-    setSuccess(
-      `Registration complete! You are registered as ${isAdmin ? "ADMIN" : "USER"}. Redirecting...`
-    );
+    setSuccess("Registration complete! Redirecting to login...");
 
     setTimeout(() => {
       navigate("/login");
-    }, 2000);
+    }, 1500);
   };
 
   return (
     <Container className="mt-5">
       <Row className="justify-content-center">
         <Col md={6}>
-          <h1 className="mb-4 text-center">Sign In</h1>
+          <h1 className="mb-4 text-center">Register</h1>
 
           {error && <Alert variant="danger">{error}</Alert>}
           {success && <Alert variant="success">{success}</Alert>}
 
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="emailField">
-              <Form.Label>Email</Form.Label>
+            <Form.Group className="mb-3" controlId="usernameField">
+              <Form.Label>Username</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </Form.Group>
 
@@ -89,16 +81,6 @@ const Register = () => {
                 placeholder="Confirm your password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-              />
-            </Form.Group>
-
-            {/* ADMIN CHECKBOX */}
-            <Form.Group className="mb-4" controlId="adminCheckbox">
-              <Form.Check
-                type="checkbox"
-                label="Register as Admin"
-                checked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
               />
             </Form.Group>
 

@@ -5,8 +5,19 @@
 
   width: 50px;
   height: 10px;
+  border-radius: 10px;
 
-  background-color: orange;
+  /* modern neon-ish gradient with subtle motion */
+  background: linear-gradient(120deg, #22d3ee 0%, #6366f1 50%, #f472b6 100%);
+  background-size: 220% 220%;
+  animation: playerGradient 5s ease-in-out infinite alternate;
+
+  /* brighter + soft glow to stand out on the field */
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.35),
+    0 0 14px rgba(99,102,241,0.65),
+    0 0 28px rgba(244,114,182,0.35);
+  border: 1px solid rgba(255,255,255,0.14);
 
   padding: 0;
   margin: 0;
@@ -16,6 +27,26 @@
 
   font-size: 0;      /* IMPORTANTISSIMO */
   line-height: 0;    /* IMPORTANTISSIMO */
+
+  position: relative;
+  overflow: visible;
+}
+
+#player::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 14px;
+  background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 60%);
+  filter: blur(6px);
+  opacity: 0.8;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes playerGradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 @media (max-width: 768px) {

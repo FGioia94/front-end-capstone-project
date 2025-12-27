@@ -1,8 +1,7 @@
 import GameField from "./components/GameField/GameField";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar/CustomNavbar";
-import { BrowserRouter, Routes, Route, data } from "react-router";
-import { useParams } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router";
 import { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import ProductDetail from "./components/ProductDetail";
@@ -12,6 +11,7 @@ import Contacts from "./components/Contacts";
 import Login from "./components/Login";
 import Checkout from "./components/Checkout";
 import PriceFilter from "./components/PriceFilter";
+import { UserProvider, useUser } from "./context/UserContext";
 
 function Home({ products, setProducts, cart, setCart, addToCart }) {
   const [filterPrice, setFilterPrice] = useState([795, 100000]);
@@ -134,20 +134,37 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-              addToCart={addToCart}
-            />
-          }
-        />
+    <UserProvider>
+      <AppContent 
+        products={products}
+        setProducts={setProducts}
+        cart={cart}
+        setCart={setCart}
+        addToCart={addToCart}
+      />
+    </UserProvider>
+  );
+}
+
+function AppContent({ products, setProducts, cart, setCart, addToCart }) {
+  const { isAdmin } = useUser();
+  return (
+    <div className={isAdmin ? "admin-dark-mode" : ""}>
+      {isAdmin && <div className="admin-badge">⚡ Admin Mode</div>}
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                products={products}
+                setProducts={setProducts}
+                cart={cart}
+                setCart={setCart}
+                addToCart={addToCart}
+              />
+            }
+          />
         <Route
           path="/contacts"
           element={
@@ -210,6 +227,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
+    </div>
   );
 }
 

@@ -1,28 +1,61 @@
-import { Button, Form } from "react-bootstrap";
-import { useState } from "react";
+import { Button } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { useUser } from "../../context/UserContext";
+import { getHighscore, saveHighscore } from "../../utils/highscoreUtils";
+import SpeedSlider from "./SpeedSlider";
+import "./ControlPanel.css";
 
 const ControlPanel = ({
   score,
   speed,
   setSpeed,
+  gameOver,
 }) => {
+  const { user, isLoggedIn, isAdmin } = useUser();
+  const [highscore, setHighscore] = useState(0);
 
+  // Save highscore when game ends
+  useEffect(() => {
+    if (gameOver && isLoggedIn) {
+      const isNew = saveHighscore(user.username, score);
+      setHighscore(getHighscore(user.username));
+    } else if (isLoggedIn) {
+      setHighscore(getHighscore(user.username));
+    }
+  }, [gameOver, score, isLoggedIn, user]);
 
   return (
-    <>
-      <h2>Score: {String(score).padStart(3, "0")}</h2>
-      <Form.Label>Range</Form.Label>
-      <Form.Range
-        value={speed}
-        min={0.1}
-        max={5}
-        step={0.01}
-        onChange={(e) => setSpeed(Number(e.target.value))}
-      />
+    <div className="control-panel-container">
+      <div className="control-panel-score">
+        <h2>Score: {String(score).padStart(3, "0")}</h2>
+        
+        <div className="control-panel-highscore">
+          {isLoggedIn ? (
+            <>
+              <span>Highscore: {String(highscore).padStart(3, "0")}</span>
+              {user && <span className="user-badge">{user.username}</span>}
+            </>
+          ) : (
+            <p className="highscore-message">
+              ⭐ Highscores recorded only for signed-in users. 
+              <a href="/register"> Register</a> to use this feature!
+            </p>
+          )}
+        </div>
+      </div>
       
-
-      {/* <Button onClick={restartGame}></Button> */}
-    </>
+      {isAdmin && (
+        <SpeedSlider speed={speed} setSpeed={setSpeed} />
+      )}
+      
+      {!isAdmin && isLoggedIn && (
+        <p className="control-panel-note">⚠️ Speed control: Admin only</p>
+      )}
+      
+      {!isLoggedIn && (
+        <p className="control-panel-note">⚠️ Speed control: Sign in as Admin</p>
+      )}
+    </div>
   );
 };
 export default ControlPanel;

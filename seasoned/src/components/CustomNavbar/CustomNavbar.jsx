@@ -1,41 +1,18 @@
 import "./CustomNavbar.css";
 import { Link, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
 import Cart from "../Cart/Cart";
+import SearchBar from "./SearchBar";
+import { useUser } from "../../context/UserContext";
 
 const CustomNavbar = ({ products, cart, setCart }) => {
-  const [searchText, setSearchText] = useState("");
-  const [warning, setWarning] = useState("");
+  const { isLoggedIn, user, logout } = useUser();
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (searchText.trim() === "") {
-  //     setWarning("Field cannot be empty!");
-  //   } else {
-  //     setWarning("");
-  //   }
-  // }, [searchText]);
-
-  const checkText = () => {
-    if (searchText.trim() === "") {
-      setWarning("Field cannot be empty!");
-      return false;
-    } else {
-      setWarning("");
-      return true;
-    }
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
-  const search = (event) => {
-    event.preventDefault();
-    if (checkText()) {
-      navigate(`/search?q=${encodeURIComponent(searchText)}`, {
-        state: {
-          products: products,
-        },
-      });
-    }
-  };
   return (
     <>
       <nav>
@@ -47,30 +24,26 @@ const CustomNavbar = ({ products, cart, setCart }) => {
             <Link to={"/contacts"}>Contacts</Link>
           </li>
 
-          <li>
-            <form onSubmit={search}>
-              <input
-                type="text"
-                name="searchbar"
-                onChange={(event) => {
-                  setSearchText(event.target.value);
-                }}
-                onBlur={checkText}
-                onFocus={() => {
-                  setWarning("");
-                }}
-              />
-              {warning && <p className="warning">{warning}</p>}
-              <button type="submit" id="search-button">
-                Search
-              </button>
-            </form>
+          <li className="nav-search">
+            <SearchBar products={products} />
           </li>
 
           <li className="nav-right">
-            <Link to={"/login"}>Login</Link>
-            <span style={{ margin: "0 0.5rem" }}>|</span>
-            Not a user yet? <Link to={"/register"}>Sign In</Link>
+            {isLoggedIn ? (
+              <>
+                <span className="nav-username">{user?.username}</span>
+                <span style={{ margin: "0 0.5rem" }}>|</span>
+                <button className="nav-logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to={"/login"}>Login</Link>
+                <span style={{ margin: "0 0.5rem" }}>|</span>
+                Not a user yet? <Link to={"/register"}>Sign In</Link>
+              </>
+            )}
             <Cart cart={cart} setCart={setCart} compact={true} />
           </li>
         </ul>

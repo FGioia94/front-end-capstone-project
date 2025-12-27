@@ -1,0 +1,127 @@
+/* Admin Background Panel styling */
+.admin-bg-panel {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 5;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-width: 320px;
+  color: #ffffff;
+}
+
+.admin-bg-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.admin-bg-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-bg-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.palette-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.palette-btn {
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1.5px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.palette-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.palette-btn.active {
+  background: linear-gradient(120deg, #6366f1, #8b5cf6);
+  border-color: #7c3aed;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.opacity-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.opacity-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #7cf2ff;
+}
+
+.opacity-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, #6366f1, #ec4899);
+  border: 2px solid #ffffff;
+  cursor: grab;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.opacity-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, #6366f1, #ec4899);
+  border: 2px solid #ffffff;
+  cursor: grab;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.opacity-slider:hover::-webkit-slider-thumb,
+.opacity-slider:hover::-moz-range-thumb {
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .admin-bg-panel {
+    max-width: 280px;
+    padding: 0.8rem;
+  }
+
+  .palette-buttons {
+    grid-template-columns: 1fr;
+  }
+}

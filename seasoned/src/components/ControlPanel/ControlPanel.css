@@ -1,0 +1,78 @@
+/* ControlPanel styling */
+.control-panel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  max-width: 300px;
+}
+
+.control-panel-score h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.control-panel-highscore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding: 8px 12px;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.control-panel-highscore span {
+  font-size: 0.95rem;
+  color: #94f3e4;
+  font-weight: 600;
+}
+
+.user-badge {
+  background: linear-gradient(120deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.control-panel-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
+}
+
+.highscore-message {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+  margin: 0;
+  text-align: center;
+  padding: 8px;
+}
+
+.highscore-message a {
+  color: #7c3aed;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.highscore-message a:hover {
+  color: #a78bfa;
+  text-decoration: underline;
+}
