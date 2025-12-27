@@ -85,3 +85,25 @@
 .admin-dark-mode .product-card:hover {
   border-color: rgba(124, 58, 237, 0.5);
 }
+
+.admin-dark-mode .product-card .btn-primary {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.admin-dark-mode .product-card .btn-primary:hover {
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+  transform: translateY(-2px);
+}
+
+.admin-dark-mode .product-card .card-title {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .product-card .card-text {
+  color: #cbd5e1;
+}

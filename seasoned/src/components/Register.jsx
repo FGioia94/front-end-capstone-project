@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useUser } from "../context/UserContext";
+import "./Register.css";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -35,7 +37,22 @@ const Register = () => {
       return;
     }
 
-    // Register as regular user and redirect to login
+    // Save user to localStorage
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    
+    if (users[username]) {
+      setError("Username already exists");
+      setSuccess("");
+      return;
+    }
+    
+    users[username] = {
+      password: password,
+      role: isAdmin ? "admin" : "user"
+    };
+    
+    localStorage.setItem("users", JSON.stringify(users));
+
     setError("");
     setSuccess("Registration complete! Redirecting to login...");
 
@@ -45,13 +62,13 @@ const Register = () => {
   };
 
   return (
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <h1 className="mb-4 text-center">Register</h1>
+    <div className="register-container">
+      <div className="register-card">
+        <h1 className="text-center">Create Account</h1>
+        <p className="register-subtitle">Join Not an Ecommerce clone today</p>
 
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
+        {error && <Alert variant="danger">{error}</Alert>}
+        {success && <Alert variant="success">{success}</Alert>}
 
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="usernameField">
@@ -84,13 +101,25 @@ const Register = () => {
               />
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100">
+            <Form.Group className="mb-3 register-admin-checkbox" controlId="adminCheckbox">
+              <Form.Check
+                type="checkbox"
+                label="Register as Admin"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+              />
+            </Form.Group>
+
+            <Button type="submit" className="w-100 register-submit-btn">
               Register
             </Button>
+
+            <p className="register-footer text-center">
+              Already have an account? <Link to="/login" className="register-link">Log In</Link>
+            </p>
           </Form>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
   );
 };
 

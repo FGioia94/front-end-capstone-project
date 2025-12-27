@@ -98,3 +98,19 @@
 .dual-slider input[type=range]:focus-visible {
   outline: none;
 }
+
+@media (max-width: 768px) {
+  .price-filter {
+    max-width: 100%;
+    padding: 8px 12px;
+  }
+  
+  .price-filter__labels {
+    font-size: 11px;
+  }
+}
+
+/* Dark mode styles */
+.admin-dark-mode .price-filter__labels {
+  color: #e2e8f0;
+}

@@ -72,6 +72,14 @@
 /* Ensure product cards don't overflow */
 .search-results-grid .product-card {
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-results-grid .product-card .card-body {
+  margin-top: auto;
+  width: 100%;
 }
 
 .search-results-grid .product-card img,

@@ -2,7 +2,7 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { Link } from "react-router";
 
-const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, cardStyle }) => {
+const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, setIsPaused, manualPauseRef, cardStyle }) => {
   const pos = position || { x: 0, y: 0 };
   const finalSize = size || { width: 100, height: 80 };
 
@@ -12,11 +12,24 @@ const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, cardS
     }
   };
 
+  const handleMouseEnter = () => {
+    if (gameMode && setIsPaused) {
+      setIsPaused(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (gameMode && setIsPaused && manualPauseRef && !manualPauseRef.current) {
+      setIsPaused(false);
+    }
+  };
+
   if (gameMode) {
     return (
-      <Link
-        to={`/product/${prod.id}`}
-        className="product-card"
+      <div
+        className="product-card game-mode-card"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
           "--card-x": `${pos.x}px`,
           "--card-y": `${pos.y}px`,
@@ -25,8 +38,21 @@ const ProductCard = ({ position, size, prod, gameMode, setCart, addToCart, cardS
           ...cardStyle,
         }}
       >
-        <img src={prod.image} alt={prod.title} />
-      </Link>
+        <Link to={`/product/${prod.id}`} className="game-card-image-link">
+          <img src={prod.image} alt={prod.title} />
+        </Link>
+        <Button 
+          variant="primary" 
+          size="sm" 
+          onClick={(e) => {
+            e.preventDefault();
+            handleAddToCart();
+          }}
+          className="game-card-btn"
+        >
+          +
+        </Button>
+      </div>
     );
   }
 

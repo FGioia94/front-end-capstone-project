@@ -7,10 +7,11 @@ import "./GameField.css";
 import ControlPanel from "../ControlPanel/ControlPanel.jsx";
 import SortControls from "../SortControls/SortControls.jsx";
 import AdminBackgroundPanel from "./AdminBackgroundPanel.jsx";
+import PriceFilter from "../PriceFilter.jsx";
 import { Form } from "react-bootstrap";
 
-const PLAYER_WIDTH = 50;
-const PLAYER_HEIGHT = 10;
+const getPlayerWidth = () => window.innerWidth <= 768 ? 30 : 50;
+const getPlayerHeight = () => window.innerWidth <= 768 ? 6 : 10;
 
 const GameField = ({
   products,
@@ -19,6 +20,8 @@ const GameField = ({
   filterPrice,
   setFilterPrice,
   addToCart,
+  gameMode,
+  setGameMode,
 }) => {
   const { isAdmin } = useUser();
 
@@ -27,11 +30,12 @@ const GameField = ({
     height: 0,
   });
 
-  const [gameMode, setGameMode] = useState(false);
   const [positions, setPositions] = useState({});
   const [sizes, setSizes] = useState({});
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(null);
   const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 });
   const [speed, setSpeed] = useState(1);
   const [backgroundImage, setBackgroundImage] = useState("");
@@ -49,6 +53,8 @@ const GameField = ({
   const playerPosRef = useRef(playerPos);
   const speedRef = useRef(actualSpeed);
   const gameOverRef = useRef(gameOver);
+  const isPausedRef = useRef(isPaused);
+  const manualPauseRef = useRef(false);
 
   // Create a safe setSpeed that only allows admins to change speed
   const safeSetSpeed = (newSpeed) => {
@@ -98,12 +104,23 @@ const GameField = ({
   }, [playerPos]);
 
   useEffect(() => {
-    speedRef.current = speed;
-  }, [speed]);
+    speedRef.current = actualSpeed;
+  }, [actualSpeed]);
 
   useEffect(() => {
     gameOverRef.current = gameOver;
   }, [gameOver]);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  // Reset speed to 1 when admin logs out during game
+  useEffect(() => {
+    if (!isAdmin && gameMode && speed !== 1) {
+      setSpeed(1);
+    }
+  }, [isAdmin, gameMode, speed]);
 
   useEffect(() => {
     // Generate an abstract gradient background (no external images)
@@ -160,6 +177,37 @@ const GameField = ({
     // kept intentionally empty - resize handler is declared at top-level now
   }, []);
 
+  // Disable body scrolling when in game mode
+  useEffect(() => {
+    if (gameMode) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [gameMode]);
+
+  // Handle Escape key to toggle pause in game mode
+  useEffect(() => {
+    if (!gameMode || gameOver) return;
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setIsPaused((prev) => {
+          const newPaused = !prev;
+          manualPauseRef.current = newPaused;
+          return newPaused;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [gameMode, gameOver]);
+
   // updateContainerSize is used in multiple places (initial measurement,
   // on resize, and when switching modes) so keep it at component scope.
   const updateContainerSize = () => {
@@ -190,8 +238,8 @@ const GameField = ({
     if (containerSize.width === 0 || containerSize.height === 0) return;
 
     setPlayerPos({
-      x: containerSize.width / 2 - PLAYER_WIDTH / 2,
-      y: containerSize.height - PLAYER_HEIGHT - 5,
+      x: containerSize.width / 2 - getPlayerWidth() / 2,
+      y: containerSize.height - getPlayerHeight() - 5,
     });
   }, [containerSize]);
 
@@ -354,12 +402,18 @@ const GameField = ({
     setPositions(finalPositions);
     setScore(0);
     setGameOver(false);
+    setGameStartTime(Date.now());
   };
 
   const moveAll = () => {
     const currentPositions = { ...positionsRef.current };
     const currentSizes = sizesRef.current;
     const currentSpeed = speedRef.current;
+    
+    // Calculate progressive speed: increases by 50% every 10 seconds
+    const elapsedSeconds = gameStartTime ? (Date.now() - gameStartTime) / 1000 : 0;
+    const progressiveMultiplier = 1 + (elapsedSeconds / 10) * 0.5;
+    const finalSpeed = currentSpeed * progressiveMultiplier;
 
     filteredProducts.forEach((prod) => {
       const currentPos = currentPositions[prod.id];
@@ -368,7 +422,7 @@ const GameField = ({
 
       const newPos = {
         x: currentPos.x,
-        y: currentPos.y + 1 * currentSpeed,
+        y: currentPos.y + 1 * finalSpeed,
       };
 
       currentPositions[prod.id] = newPos;
@@ -384,7 +438,10 @@ const GameField = ({
     let animationFrameId;
 
     const loop = () => {
-      if (gameOverRef.current) return;
+      if (gameOverRef.current || isPausedRef.current) {
+        animationFrameId = requestAnimationFrame(loop);
+        return;
+      }
 
       moveAll();
 
@@ -397,8 +454,8 @@ const GameField = ({
         y: currentPlayerPos.y,
       };
       const playerHitboxSize = {
-        width: PLAYER_WIDTH,
-        height: PLAYER_HEIGHT,
+        width: getPlayerWidth(),
+        height: getPlayerHeight(),
       };
 
       let collisionThisFrame = false;
@@ -452,7 +509,6 @@ const GameField = ({
       if (collisionThisFrame) {
         setGameOver(true);
         gameOverRef.current = true;
-        return;
       }
 
       animationFrameId = requestAnimationFrame(loop);
@@ -468,21 +524,21 @@ const GameField = ({
     }
   }, [gameMode, sizes, containerSize, products]);
   console.log("RENDER GAMEFIELD");
+  
+  // Hide the PriceFilter in App.jsx when in game mode
+  useEffect(() => {
+    const priceFilterInApp = document.querySelector('.price-filter');
+    if (priceFilterInApp && priceFilterInApp.parentElement) {
+      if (gameMode) {
+        priceFilterInApp.style.display = 'none';
+      } else {
+        priceFilterInApp.style.display = '';
+      }
+    }
+  }, [gameMode]);
+  
   return (
     <div className={gameMode ? "no-scroll game-mode-layout" : ""}>
-      {gameMode && (
-        <ControlPanel score={score} speed={speed} setSpeed={safeSetSpeed} gameOver={gameOver} />
-      )}
-
-      {gameMode && isAdmin && (
-        <AdminBackgroundPanel
-          palette={adminBgPalette}
-          setPalette={setAdminBgPalette}
-          opacity={adminBgOpacity}
-          setOpacity={setAdminBgOpacity}
-        />
-      )}
-
       {!gameMode && (
         <div className="product-controls">
           <SortControls sortBy={sortBy} setSortBy={setSortBy} />
@@ -495,6 +551,26 @@ const GameField = ({
         style={{ '--game-bg': backgroundImage }}
         className={gameMode ? "game-display" : "product-display"}
       >
+        {gameMode && (
+          <ControlPanel 
+            score={score} 
+            speed={speed} 
+            setSpeed={safeSetSpeed} 
+            gameOver={gameOver}
+            filterPrice={filterPrice}
+            setFilterPrice={setFilterPrice}
+          />
+        )}
+
+        {gameMode && isAdmin && window.innerWidth > 768 && (
+          <AdminBackgroundPanel
+            palette={adminBgPalette}
+            setPalette={setAdminBgPalette}
+            opacity={adminBgOpacity}
+            setOpacity={setAdminBgOpacity}
+          />
+        )}
+
         {loading && !gameMode ? (
           // show skeletons while loading
           Array.from({ length: 8 }).map((_, i) => (
@@ -508,8 +584,8 @@ const GameField = ({
             if (gameMode && pos && size && containerSize.width && containerSize.height) {
               const cardCenterX = pos.x + (size.width || 0) / 2;
               const cardCenterY = pos.y + (size.height || 0) / 2;
-              const playerCenterX = playerPos.x + PLAYER_WIDTH / 2;
-              const playerCenterY = playerPos.y + PLAYER_HEIGHT / 2;
+              const playerCenterX = playerPos.x + getPlayerWidth() / 2;
+              const playerCenterY = playerPos.y + getPlayerHeight() / 2;
               const dx = cardCenterX - playerCenterX;
               const dy = cardCenterY - playerCenterY;
               const dist = Math.hypot(dx, dy);
@@ -534,27 +610,55 @@ const GameField = ({
                 gameMode={gameMode}
                 setCart={setCart}
                 addToCart={addToCart}
+                setIsPaused={setIsPaused}
+                manualPauseRef={manualPauseRef}
                 cardStyle={{ animationDelay: `${i * 60}ms`, "--danger": danger }}
               />
             );
           })
         )}
         {gameMode && (
-          <Player playerPos={playerPos} setPlayerPos={setPlayerPos} />
+          <Player playerPos={playerPos} setPlayerPos={setPlayerPos} isPaused={isPaused} gameOver={gameOver} />
         )}
+        
+        <button
+          className="game-mode-toggle-btn"
+          onClick={() => {
+            if (!gameMode) initializeGame();
+            setGameMode(!gameMode);
+          }}
+          disabled={!backgroundImageLoaded}
+        >
+          {!backgroundImageLoaded ? "Loading..." : gameMode ? "Product Mode" : "Game Mode"}
+        </button>
       </div>
 
-      <button
-        onClick={() => {
-          if (!gameMode) initializeGame();
-          setGameMode(!gameMode);
-        }}
-        disabled={!backgroundImageLoaded}
-      >
-        {!backgroundImageLoaded ? "Loading background..." : gameMode ? "Product Mode" : "Game Mode"}
-      </button>
+      {gameOver && gameMode && (
+        <div className="game-over-overlay">
+          <h2>GAME OVER</h2>
+          <p>Final Score: {score}</p>
+          <button
+            className="play-again-btn"
+            onClick={() => {
+              setGameOver(false);
+              gameOverRef.current = false;
+              setScore(0);
+              setGameStartTime(null);
+              setSpeed(1);
+              initializeGame();
+            }}
+          >
+            Play Again
+          </button>
+        </div>
+      )}
 
-      {gameOver && gameMode && <h2>GAME OVER</h2>}
+      {isPaused && gameMode && !gameOver && (
+        <div className="pause-overlay">
+          <h2>PAUSED</h2>
+          <p>Press ESC to resume</p>
+        </div>
+      )}
     </div>
   );
 };

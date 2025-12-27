@@ -15,6 +15,8 @@ import { UserProvider, useUser } from "./context/UserContext";
 
 function Home({ products, setProducts, cart, setCart, addToCart }) {
   const [filterPrice, setFilterPrice] = useState([795, 100000]);
+  const [gameMode, setGameMode] = useState(false);
+  
   return (
     <>
       <CustomNavbar
@@ -22,6 +24,7 @@ function Home({ products, setProducts, cart, setCart, addToCart }) {
         setProducts={setProducts}
         cart={cart}
         setCart={setCart}
+        setGameMode={setGameMode}
       ></CustomNavbar>
       <PriceFilter
         filterPrice={filterPrice}
@@ -34,6 +37,8 @@ function Home({ products, setProducts, cart, setCart, addToCart }) {
         filterPrice={filterPrice}
         setFilterPrice={setFilterPrice}
         addToCart={addToCart}
+        gameMode={gameMode}
+        setGameMode={setGameMode}
       ></GameField>
     </>
   );
@@ -150,7 +155,6 @@ function AppContent({ products, setProducts, cart, setCart, addToCart }) {
   const { isAdmin } = useUser();
   return (
     <div className={isAdmin ? "admin-dark-mode" : ""}>
-      {isAdmin && <div className="admin-badge">⚡ Admin Mode</div>}
       <BrowserRouter>
         <Routes>
           <Route

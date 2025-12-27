@@ -1,10 +1,13 @@
 import "./Player.css";
 import { useEffect, useRef } from "react";
 
-const Player = ({ playerPos, setPlayerPos }) => {
+const Player = ({ playerPos, setPlayerPos, isPaused, gameOver }) => {
   const touchStartX = useRef(null);
 
   useEffect(() => {
+    // Don't allow movement if game is paused or over
+    if (isPaused || gameOver) return;
+
     const isMobile = window.innerWidth <= 768;
 
     if (isMobile) {
@@ -57,7 +60,7 @@ const Player = ({ playerPos, setPlayerPos }) => {
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [setPlayerPos]);
+  }, [setPlayerPos, isPaused, gameOver]);
 
   return (
     <div

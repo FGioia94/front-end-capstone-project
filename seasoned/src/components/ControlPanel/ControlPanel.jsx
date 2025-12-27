@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import { getHighscore, saveHighscore } from "../../utils/highscoreUtils";
 import SpeedSlider from "./SpeedSlider";
+import PriceFilter from "../PriceFilter";
 import "./ControlPanel.css";
 
 const ControlPanel = ({
@@ -10,6 +11,8 @@ const ControlPanel = ({
   speed,
   setSpeed,
   gameOver,
+  filterPrice,
+  setFilterPrice,
 }) => {
   const { user, isLoggedIn, isAdmin } = useUser();
   const [highscore, setHighscore] = useState(0);
@@ -47,6 +50,10 @@ const ControlPanel = ({
       {isAdmin && (
         <SpeedSlider speed={speed} setSpeed={setSpeed} />
       )}
+      
+      <div className="control-panel-section">
+        <PriceFilter filterPrice={filterPrice} setFilterPrice={setFilterPrice} />
+      </div>
       
       {!isAdmin && isLoggedIn && (
         <p className="control-panel-note">⚠️ Speed control: Admin only</p>

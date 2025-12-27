@@ -4,7 +4,7 @@ import Cart from "../Cart/Cart";
 import SearchBar from "./SearchBar";
 import { useUser } from "../../context/UserContext";
 
-const CustomNavbar = ({ products, cart, setCart }) => {
+const CustomNavbar = ({ products, cart, setCart, setGameMode }) => {
   const { isLoggedIn, user, logout } = useUser();
   const navigate = useNavigate();
 
@@ -13,12 +13,18 @@ const CustomNavbar = ({ products, cart, setCart }) => {
     navigate("/");
   };
 
+  const handleHomeClick = () => {
+    if (setGameMode) {
+      setGameMode(false);
+    }
+  };
+
   return (
     <>
       <nav>
         <ul>
           <li>
-            <Link to={"/"}>Home</Link>
+            <Link to={"/"} onClick={handleHomeClick}>Home</Link>
           </li>
           <li>
             <Link to={"/contacts"}>Contacts</Link>

@@ -1,21 +1,28 @@
 /* ControlPanel styling */
 .control-panel-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   max-width: 300px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .control-panel-score h2 {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #1e293b;
   margin: 0;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(255,255,255,0.3);
 }
 
 .control-panel-highscore {
@@ -32,8 +39,9 @@
 
 .control-panel-highscore span {
   font-size: 0.95rem;
-  color: #94f3e4;
+  color: #0f172a;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
 }
 
 .user-badge {
@@ -46,11 +54,15 @@
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid rgba(99, 102, 241, 0.4);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .control-panel-note {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: #1e293b;
   margin: 0;
   font-weight: 500;
   text-align: center;
@@ -58,7 +70,7 @@
 
 .highscore-message {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: #1e293b;
   line-height: 1.4;
   margin: 0;
   text-align: center;
@@ -75,4 +87,21 @@
 .highscore-message a:hover {
   color: #a78bfa;
   text-decoration: underline;
+}
+
+/* Dark mode styles */
+.admin-dark-mode .control-panel-note {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .control-panel-score h2 {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .control-panel-highscore span {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .highscore-message {
+  color: #e2e8f0;
 }

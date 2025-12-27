@@ -6,7 +6,6 @@
   width: 100%;
   height: 85vh;
   margin: 0;
-  padding: 0;
   border: none;
   border-radius: 0;
   overflow: hidden;
@@ -46,7 +45,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
-  padding: 12px;
+  padding: 1.5rem 4rem;
   overflow-y: auto;
   height: 100%;
 }
@@ -57,9 +56,23 @@
   right: 12px;
   z-index: 5;
   padding: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
+  .product-controls {
+    position: static;
+    width: 100%;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
   #game-field {
     width: 100vw !important;
     margin-left: calc(-50vw + 50%) !important;
@@ -70,6 +83,10 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 0.5rem;
     padding: 8px;
+  }
+  
+  .game-mode-layout {
+    padding-top: 160px;
   }
 }
 
@@ -109,9 +126,9 @@
 /* BASE CARD (product mode) */
 .product-display .product-card {
   position: relative; /* allow overlay */
-  height: auto;
+  height: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   flex-direction: column;
   align-items: center;
   padding: 8px;
@@ -133,6 +150,8 @@
   align-items: center;
   padding: 12px;
   text-align: center;
+  margin-top: auto;
+  width: 100%;
 }
 
 .product-display .product-card:hover {
@@ -208,6 +227,42 @@
   border-radius: 10px;
 }
 
+/* Game mode card specific styling */
+.game-mode-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card-image-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.game-card-btn {
+  position: absolute !important;
+  bottom: 6px !important;
+  right: 6px !important;
+  padding: 4px 10px !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  min-width: 32px !important;
+  border-radius: 8px !important;
+  z-index: 5 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.game-mode-card:hover .game-card-btn {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 /* overlay that tints the card red based on --danger (0..1) */
 .product-card::after {
   content: "";
@@ -234,7 +289,157 @@
 * { box-sizing: border-box; }
 
 /* Disable scroll only in game mode */
-.no-scroll { overflow: hidden; height: 100vh; }
+.no-scroll { 
+  overflow: hidden !important; 
+  height: 100vh !important; 
+}
 
 /* Game layout wrapper */
-.game-mode-layout { display:flex; flex-direction:column; width:100%; height:100vh; overflow:hidden; }
+.game-mode-layout { 
+  display:flex; 
+  flex-direction:column; 
+  width:100%; 
+  height:100vh; 
+  overflow:hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 70px;
+  z-index: 1;
+}
+
+/* Game Over Overlay */
+.game-over-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+  padding: 2.5rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+  text-align: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(99,102,241,0.3);
+}
+
+.game-over-overlay h2 {
+  color: #ffffff;
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 4px 12px rgba(244,114,182,0.4);
+  letter-spacing: 2px;
+}
+
+.game-over-overlay p {
+  color: #94f3e4;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 2rem 0;
+}
+
+.play-again-btn {
+  background: linear-gradient(120deg, #6366f1, #ec4899);
+  color: #ffffff;
+  border: none;
+  padding: 0.875rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+}
+
+.play-again-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(99,102,241,0.5);
+}
+
+/* Pause Overlay */
+.pause-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95));
+  padding: 2.5rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+  text-align: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(251,191,36,0.3);
+}
+
+.pause-overlay h2 {
+  color: #fbbf24;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 4px 12px rgba(251,191,36,0.4);
+  letter-spacing: 2px;
+}
+
+.pause-overlay p {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Game Mode Toggle Button */
+.game-mode-toggle-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 15;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(120deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.game-mode-toggle-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.5);
+}
+
+.game-mode-toggle-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.game-mode-toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .game-mode-toggle-btn {
+    padding: 0.5rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    font-size: 0;
+    top: 105px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .game-mode-toggle-btn::before {
+    content: "🎮";
+    font-size: 1.5rem;
+  }
+}

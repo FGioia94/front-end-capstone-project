@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate, Link } from "react-router";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import "./Login.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -27,10 +28,26 @@ const Login = () => {
       return;
     }
 
-    // Mock authentication - login as regular user
-    login(username, "user");
+    // Check credentials from localStorage
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    const userData = users[username];
+    
+    if (!userData) {
+      setError("Invalid username or password");
+      setSuccess("");
+      return;
+    }
+    
+    if (userData.password !== password) {
+      setError("Invalid username or password");
+      setSuccess("");
+      return;
+    }
+
+    // Login with automatic role detection
+    login(username, userData.role);
     setError("");
-    setSuccess("Logged in successfully! Redirecting...");
+    setSuccess(`Logged in successfully as ${userData.role}! Redirecting...`);
 
     setTimeout(() => {
       navigate("/");
@@ -38,13 +55,13 @@ const Login = () => {
   };
 
   return (
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <h1 className="mb-4 text-center">Login</h1>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="text-center">Welcome Back</h1>
+        <p className="login-subtitle">Sign in to continue to Not an Ecommerce clone</p>
 
-          {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{success}</Alert>}
+        {error && <Alert variant="danger">{error}</Alert>}
+        {success && <Alert variant="success">{success}</Alert>}
 
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3" controlId="usernameField">
@@ -67,17 +84,16 @@ const Login = () => {
               />
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100">
+            <Button type="submit" className="w-100 login-submit-btn">
               Login
             </Button>
 
-            <p className="mt-3 text-center">
-              Not subscribed yet? <Link to="/register">Sign In</Link>
+            <p className="login-footer text-center">
+              Not subscribed yet? <Link to="/register" className="login-link">Sign Up</Link>
             </p>
           </Form>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
   );
 };
 

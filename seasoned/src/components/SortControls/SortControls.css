@@ -47,5 +47,21 @@
   .sort-controls {
     max-width: 100%;
     width: 100%;
+    padding: 8px 12px;
+    gap: 8px;
   }
+  
+  .sort-label {
+    font-size: 11px;
+  }
+  
+  .sort-select {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+}
+
+/* Dark mode styles */
+.admin-dark-mode .sort-label {
+  color: #e2e8f0;
 }
