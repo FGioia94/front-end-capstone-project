@@ -7,6 +7,9 @@ import SortControls from "../SortControls/SortControls";
 import "./SearchResult.css";
 
 const SearchResult = () => {
+  /* 
+    * This component displays search results based on query parameters.
+  */
   const [sortBy, setSortBy] = useState("default");
   const products = useSelector((state) => state.products.items);
   const loading = useSelector((state) => state.products.loading);
@@ -15,9 +18,7 @@ const SearchResult = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const searchText = params.get("q");
-  
-  console.log(searchText);
-  
+    
   if (loading || !products || products.length === 0) {
     return <p>Loading...</p>;
   }
@@ -25,6 +26,7 @@ const SearchResult = () => {
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
   };
+  // Memoized computation of matching products based on search text and sorting
   const matchingProducts = useMemo(() => {
     let result = products.filter((prod) => {
       return (

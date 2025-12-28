@@ -2,24 +2,36 @@ import { Form } from "react-bootstrap";
 import { useEffect, useMemo, useState } from "react";
 import "./PriceFilter.css";
 
-const MIN_BOUND = 795; // cents
-const MAX_BOUND = 100000; // cents
+// multiplying by 100 to avoid float precision issues, it was flickering before
+const MIN_BOUND = 795; 
+const MAX_BOUND = 100000; 
 
 const clampRange = (minIn, maxIn) => {
+  /* Clamp the input range to be within the defined bounds and ensure min is always less than max */
   const min = Math.max(MIN_BOUND, Math.min(minIn, maxIn - 1));
   const max = Math.min(MAX_BOUND, Math.max(maxIn, min + 1));
   return { min, max };
 };
 
 const PriceFilter = ({ filterPrice, setFilterPrice }) => {
+  /*
+  * This component provides a dual slider for filtering products by price.
+  * It allows users to select a minimum and maximum price within defined bounds.
+  *
+  * @param {number[]} filterPrice - The current price filter as [min, max].
+  * @param {function} setFilterPrice - Function to update the price filter.
+  * @returns {JSX.Element} The price filter component.
+  */
   const [range, setRange] = useState(() => clampRange(filterPrice[0], filterPrice[1]));
 
   // keep local state in sync with external filter changes, without looping
   useEffect(() => {
     const next = clampRange(filterPrice[0], filterPrice[1]);
+    // Only update if there's an actual change
     setRange((prev) => (prev.min !== next.min || prev.max !== next.max ? next : prev));
   }, [filterPrice]);
 
+  // Handlers for slider changes
   const handleMinChange = (value) => {
     setRange((prev) => {
       const next = clampRange(value, prev.max);
@@ -40,6 +52,7 @@ const PriceFilter = ({ filterPrice, setFilterPrice }) => {
     });
   };
 
+  // Calculate the background fill for the track between the two thumbs using useMemo for performance
   const trackFill = useMemo(() => {
     const span = MAX_BOUND - MIN_BOUND;
     const minPct = ((range.min - MIN_BOUND) / span) * 100;

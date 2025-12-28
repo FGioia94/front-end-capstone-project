@@ -3,6 +3,12 @@ import { useNavigate } from "react-router";
 import "./SearchBar.css";
 
 const SearchBar = ({ products }) => {
+  /*
+   * This component provides a search bar with autocomplete suggestions.
+   * 
+   * @param {Array} products - List of products to search from.
+   * @returns {JSX.Element} The search bar component.
+   * */
   const [searchText, setSearchText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -75,6 +81,7 @@ const SearchBar = ({ products }) => {
   const handleKeyDown = (e) => {
     if (!showSuggestions || suggestions.length === 0) return;
 
+    // Handle keyboard navigation in suggestions
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();

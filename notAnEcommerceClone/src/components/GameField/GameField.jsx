@@ -13,25 +13,35 @@ import PriceFilter from "../PriceFilter/PriceFilter.jsx";
 import { Form } from "react-bootstrap";
 import { useLocation } from "react-router";
 
-const getPlayerWidth = () => window.innerWidth <= 768 ? 30 : 50;
-const getPlayerHeight = () => window.innerWidth <= 768 ? 6 : 10;
+const getPlayerWidth = () => (window.innerWidth <= 768 ? 30 : 50);
+const getPlayerHeight = () => (window.innerWidth <= 768 ? 6 : 10);
 
 const GameField = () => {
+  /*
+   * This component renders the game field where products are displayed as cards.
+   * It includes player controls, score tracking, and game settings.
+   * The page can be viewed in two modes: product browsing and game mode.
+   * product browsing mode allows users to filter and sort products,
+   * while game mode turns the page into an interactive game.
+   * in game mode, products fall from the top of the screen,
+   * and the player must avoid colliding with them.
+
+   * @returns {JSX.Element} The game field component.
+   */
+
+  // Redux selectors and dispatch
   const { isAdmin, products } = useSelector((state) => ({
     isAdmin: selectIsAdmin(state),
-    products: state.products.items
+    products: state.products.items,
   }));
   const dispatch = useDispatch();
   const location = useLocation();
-  
   const [filterPrice, setFilterPrice] = useState([795, 100000]);
   const [gameMode, setGameMode] = useState(false);
-
   const [containerSize, setContainerSize] = useState({
     width: 0,
     height: 0,
   });
-
   const [positions, setPositions] = useState({});
   const [sizes, setSizes] = useState({});
   const [score, setScore] = useState(0);
@@ -49,6 +59,11 @@ const GameField = () => {
   // Only allow speed to be used if user is admin
   const actualSpeed = isAdmin ? speed : 1;
 
+  // Refs for mutable values used in game loop
+  // we need these to avoid stale closures in requestAnimationFrame
+  // this means we don't have to add these to effect dependencies and
+  // cause unwanted re-renders
+
   const containerRef = useRef(null);
   const positionsRef = useRef({});
   const sizesRef = useRef({});
@@ -59,16 +74,25 @@ const GameField = () => {
   const manualPauseRef = useRef(false);
 
   // Create a safe setSpeed that only allows admins to change speed
-  const safeSetSpeed = useCallback((newSpeed) => {
-    if (isAdmin) {
-      setSpeed(newSpeed);
-    }
-  }, [isAdmin]);
-  
-  const addToCart = useCallback((product) => {
-    dispatch(addToCartAction(product));
-  }, [dispatch]);
+  const safeSetSpeed = useCallback(
+    (newSpeed) => {
+      if (isAdmin) {
+        setSpeed(newSpeed);
+      }
+    },
+    [isAdmin]
+  );
 
+  // Memoized addToCart to avoid re-renders
+  const addToCart = useCallback(
+    (product) => {
+      dispatch(addToCartAction(product));
+    },
+    [dispatch]
+  );
+
+  // Filter products based on price range, useMemo is used to introduce memoization
+  // and avoid unnecessary recalculations on re-renders
   const filteredProducts = useMemo(() => {
     let result = products.filter(
       (p) => p.price >= filterPrice[0] / 100 && p.price <= filterPrice[1] / 100
@@ -96,12 +120,12 @@ const GameField = () => {
   }, [products, filterPrice, sortBy]);
 
   const loading = products.length === 0;
+
   // Reset game mode when component mounts or location changes
   useEffect(() => {
     setGameMode(false);
   }, [location.pathname]);
-  
-  // 
+
   // Sync refs inline to avoid extra effect runs
   positionsRef.current = positions;
   sizesRef.current = sizes;
@@ -168,20 +192,19 @@ const GameField = () => {
     setBackgroundImageLoaded(true);
   }, [gameMode, isAdmin, adminBgPalette, adminBgOpacity]);
 
-  useEffect(() => {
-    // kept intentionally empty - resize handler is declared at top-level now
-  }, []);
+  // useEffect(() => {
+  //   // kept intentionally empty - resize handler is declared at top-level now
+  // }, []);
 
   // Disable body scrolling when in game mode
   useEffect(() => {
     if (gameMode) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     }
-    
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     };
   }, [gameMode]);
 
@@ -190,7 +213,7 @@ const GameField = () => {
     if (!gameMode || gameOver) return;
 
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsPaused((prev) => {
           const newPaused = !prev;
           manualPauseRef.current = newPaused;
@@ -199,12 +222,13 @@ const GameField = () => {
       }
     };
 
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [gameMode, gameOver]);
 
   // updateContainerSize is used in multiple places (initial measurement,
   // on resize, and when switching modes) so keep it at component scope.
+  // useCallback is used to memoize the function similar to useMemo for values.
   const updateContainerSize = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
@@ -215,6 +239,15 @@ const GameField = () => {
     }
   }, []);
 
+  // Initial container size measurement and on window resize. 
+  // It works by attaching a resize event listener to the window so when
+  // the window is resized, the container size is recalculated.
+  // I tried using ResizeObserver but it caused too many re-renders.
+  // Another thing that I tried was to counterscale the container with CSS in gamemode, but it was 
+  // causing issues with position calculations.
+
+  // Ideally, no resize should be necessary during gameplay, as it can disrupt the experience, but I couldn't find
+  // a better solution that worked reliably across different scenarios, including mobile devices.
   useEffect(() => {
     updateContainerSize();
     window.addEventListener("resize", updateContainerSize);
@@ -224,11 +257,13 @@ const GameField = () => {
   // Recompute container size when switching between product/game mode so
   // positioning uses the correct available area.
   useEffect(() => {
-    // allow layout to settle (class changes may affect flow)
+    // allow layout to settle
     const t = setTimeout(() => updateContainerSize(), 0);
     return () => clearTimeout(t);
   }, [gameMode, filteredProducts.length]);
 
+
+  // set player start position based on container size (at the bottom center)
   useEffect(() => {
     if (containerSize.width === 0 || containerSize.height === 0) return;
 
@@ -238,6 +273,7 @@ const GameField = () => {
     });
   }, [containerSize]);
 
+  // Calculate card size based on price
   const getCardSize = (price) => {
     let remappedValue;
     if (price < 50) {
@@ -247,11 +283,11 @@ const GameField = () => {
     } else {
       remappedValue = 500;
     }
-    
+
     // Minimal scaling on mobile
     const isMobile = window.innerWidth <= 768;
     const scale = isMobile ? 0.7 : 1;
-    
+
     return {
       height: remappedValue * 0.3 * scale,
       width: remappedValue * 0.2 * scale,
@@ -268,6 +304,7 @@ const GameField = () => {
     });
   };
 
+  // Ensure all filtered products have sizes calculated
   const updateCardSizes = useCallback(() => {
     filteredProducts.forEach((prod) => {
       // Only calculate size if it doesn't exist
@@ -277,10 +314,16 @@ const GameField = () => {
     });
   }, [filteredProducts]);
 
+  // Initial size calculation, and whenever filtered products change. In the array of dependencies, i put updateCardSizes 
+  // because it is memoized with useCallback, so it will only change if filteredProducts change.
   useEffect(() => {
     updateCardSizes();
   }, [updateCardSizes]);
 
+  // This uses a simple PRNG (Pseudo‑Random Number Generator) 
+  // based on product ID to ensure consistent random positions
+  // I used mulberry32 because it is simple and fast for this use case
+  // Here is the repo I got it from: https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
   const generateRandomPositions = (element, maxHeight, maxWidth) => {
     const size = sizesRef.current[element.id];
     if (!size) return { x: 0, y: 0 };
@@ -297,6 +340,8 @@ const GameField = () => {
     return { x: Math.floor(posX), y: Math.floor(posY) };
   };
 
+  // Collision detection between two rectangles using the AABB method (Axis-Aligned Bounding Box)
+  // Found some reference here https://tutorialedge.net/gamedev/aabb-collision-detection-tutorial/
   const isColliding = (posA, sizeA, posB, sizeB) => {
     if (!posA || !posB || !sizeA || !sizeB) return false;
     return !(
@@ -306,6 +351,13 @@ const GameField = () => {
       posA.y > posB.y + sizeB.height
     );
   };
+
+  // Resolve collisions by adjusting positions iteratively. Iterations means that it may not succeed 100%, but
+  // it should be good enough for this use case without causing too much performance overhead.
+
+  // What it does is it loops through all pairs of products and checks if they are colliding. 
+  // If they are, it adjusts their positions slightly apart from each other.
+  // This process is repeated until no collisions are detected or a maximum number of iterations is reached.
 
   const resolveCollisions = (initialPositions, sizes, maxWidth, maxHeight) => {
     const finalPositions = { ...initialPositions };
@@ -374,6 +426,8 @@ const GameField = () => {
     return finalPositions;
   };
 
+  // Initialize game by generating random starting positions for all products and then resolving collisions
+  // It also resets score, game over state, and start time.
   const initializeGame = () => {
     if (Object.keys(sizesRef.current).length === 0) return;
 
@@ -405,13 +459,18 @@ const GameField = () => {
     setGameStartTime(Date.now());
   };
 
+  // Move all products down based on speed, and reset position if they go off screen
+  // When off screen, increase score and respawn at top with new random position, after that it resolves collisions again.
+  // Finally, check for collisions with player.
   const moveAll = () => {
     const currentPositions = { ...positionsRef.current };
     const currentSizes = sizesRef.current;
     const currentSpeed = speedRef.current;
-    
+
     // Calculate progressive speed: increases by 50% every 10 seconds
-    const elapsedSeconds = gameStartTime ? (Date.now() - gameStartTime) / 1000 : 0;
+    const elapsedSeconds = gameStartTime
+      ? (Date.now() - gameStartTime) / 1000
+      : 0;
     const progressiveMultiplier = 1 + (elapsedSeconds / 10) * 0.5;
     const finalSpeed = currentSpeed * progressiveMultiplier;
 
@@ -432,6 +491,14 @@ const GameField = () => {
     setPositions(currentPositions);
   };
 
+  // Main game loop using requestAnimationFrame
+  // It moves products, checks for off-screen respawns, and detects collisions with the player.
+  // If a collision is detected, the game ends.
+  // The loop respects the paused state and game over state.
+  // It still leaver full control over the other components of the page.
+  // When hovering over a product card, the game pauses and resumes when the mouse leaves.
+  // Pressing Escape also toggles pause.
+  // Products can be clicked to add to cart without affecting the game state or to visit product page.
   useEffect(() => {
     if (!gameMode) return;
 
@@ -506,6 +573,7 @@ const GameField = () => {
         }
       });
 
+      // Check for collisions with player
       if (collisionThisFrame) {
         setGameOver(true);
         gameOverRef.current = true;
@@ -514,64 +582,73 @@ const GameField = () => {
       animationFrameId = requestAnimationFrame(loop);
     };
 
+    // Start the loop
     animationFrameId = requestAnimationFrame(loop);
+    // Cleanup on unmount or when gameMode changes
     return () => cancelAnimationFrame(animationFrameId);
   }, [gameMode, filterPrice, containerSize]);
 
+  // Initialize game when entering game mode and we have sizes calculated
   useEffect(() => {
-    if (gameMode && Object.keys(sizes).length > 0 && Object.keys(positions).length === 0) {
+    if (
+      gameMode &&
+      Object.keys(sizes).length > 0 &&
+      Object.keys(positions).length === 0
+    ) {
       // Only initialize if we don't have positions yet
       initializeGame();
     }
   }, [gameMode, sizes, containerSize, products]);
-  console.log("RENDER GAMEFIELD");
-  
+
   return (
     <div className={gameMode ? "no-scroll game-mode-layout" : ""}>
       {!gameMode && (
         <div
           ref={containerRef}
           id="game-field"
-          style={{ '--game-bg': backgroundImage }}
+          style={{ "--game-bg": backgroundImage }}
           className="product-display"
         >
           <div className="product-controls">
-            <PriceFilter filterPrice={filterPrice} setFilterPrice={setFilterPrice} />
+            {/* this section contains filters and sorting controls */}
+            <PriceFilter
+              filterPrice={filterPrice}
+              setFilterPrice={setFilterPrice}
+            />
             <SortControls sortBy={sortBy} setSortBy={setSortBy} />
           </div>
-          
-          {loading ? (
-            // show skeletons while loading
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="product-card skeleton" />
-            ))
-          ) : (
-            filteredProducts.map((prod, i) => {
-              return (
-                <ProductCard
-                  key={prod.id}
-                  prod={prod}
-                  gameMode={false}
-                  addToCart={addToCart}
-                  cardStyle={{ animationDelay: `${i * 60}ms` }}
-                />
-              );
-            })
-          )}
+
+          {loading
+            ? // show skeletons while loading
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="product-card skeleton" />
+              ))
+            : filteredProducts.map((prod, i) => {
+                return (
+                  <ProductCard
+                    key={prod.id}
+                    prod={prod}
+                    gameMode={false}
+                    addToCart={addToCart}
+                    cardStyle={{ animationDelay: `${i * 60}ms` }}
+                  />
+                );
+              })}
         </div>
       )}
-      
+
+      {/* if game mode is active, then it shows the game display and the control panel */}
       {gameMode && (
         <div
           ref={containerRef}
           id="game-field"
-          style={{ '--game-bg': backgroundImage }}
+          style={{ "--game-bg": backgroundImage }}
           className="game-display"
         >
-          <ControlPanel 
-            score={score} 
-            speed={speed} 
-            setSpeed={safeSetSpeed} 
+          <ControlPanel
+            score={score}
+            speed={speed}
+            setSpeed={safeSetSpeed}
             gameOver={gameOver}
             filterPrice={filterPrice}
             setFilterPrice={setFilterPrice}
@@ -590,7 +667,13 @@ const GameField = () => {
             const pos = positions[prod.id];
             const size = sizes[prod.id];
             let danger = 0;
-            if (gameMode && pos && size && containerSize.width && containerSize.height) {
+            if (
+              gameMode &&
+              pos &&
+              size &&
+              containerSize.width &&
+              containerSize.height
+            ) {
               const cardCenterX = pos.x + (size.width || 0) / 2;
               const cardCenterY = pos.y + (size.height || 0) / 2;
               const playerCenterX = playerPos.x + getPlayerWidth() / 2;
@@ -598,12 +681,16 @@ const GameField = () => {
               const dx = cardCenterX - playerCenterX;
               const dy = cardCenterY - playerCenterY;
               const dist = Math.hypot(dx, dy);
-              const maxDist = Math.hypot(containerSize.width, containerSize.height);
+              const maxDist = Math.hypot(
+                containerSize.width,
+                containerSize.height
+              );
               // make threshold less sensitive: only when quite close
               const threshold = maxDist * 0.18; // ~18% of diagonal
               if (dist < threshold) {
                 // nonlinear falloff so danger ramps up quickly when very close
                 const raw = (threshold - dist) / threshold;
+                // I thought it was nice to make the cards red when very close
                 danger = Math.max(0, Math.min(1, Math.pow(raw, 1.4)));
               } else {
                 danger = 0;
@@ -611,6 +698,7 @@ const GameField = () => {
             }
 
             return (
+              // Render ProductCard in game mode with position, size, and danger level
               <ProductCard
                 key={prod.id}
                 position={positions[prod.id]}
@@ -620,13 +708,23 @@ const GameField = () => {
                 addToCart={addToCart}
                 setIsPaused={setIsPaused}
                 manualPauseRef={manualPauseRef}
-                cardStyle={{ animationDelay: `${i * 60}ms`, "--danger": danger }}
+                cardStyle={{
+                  animationDelay: `${i * 60}ms`,
+                  "--danger": danger,
+                }}
               />
             );
           })}
-          
-          <Player playerPos={playerPos} setPlayerPos={setPlayerPos} isPaused={isPaused} gameOver={gameOver} />
-          
+
+          {/* Player component represents the player in the game */}
+          <Player
+            playerPos={playerPos}
+            setPlayerPos={setPlayerPos}
+            isPaused={isPaused}
+            gameOver={gameOver}
+          />
+
+          {/* button to toggle between game mode and product mode */}
           <button
             className="game-mode-toggle-btn"
             onClick={() => {
@@ -639,7 +737,7 @@ const GameField = () => {
           </button>
         </div>
       )}
-      
+
       <button
         className="game-mode-toggle-btn"
         onClick={() => {
@@ -647,7 +745,7 @@ const GameField = () => {
           setGameMode(!gameMode);
         }}
         disabled={!backgroundImageLoaded}
-        style={{ display: gameMode ? 'none' : 'block' }}
+        style={{ display: gameMode ? "none" : "block" }}
       >
         {!backgroundImageLoaded ? "Loading..." : "Game Mode"}
       </button>

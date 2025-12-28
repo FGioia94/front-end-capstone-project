@@ -15,6 +15,23 @@ const ControlPanel = ({
   filterPrice,
   setFilterPrice,
 }) => {
+  
+  /*
+   * This component renders the control panel for the game.
+   * It displays the current score, highscore, and user information.
+   * If the user is an admin, it also provides a speed control slider.
+   * Additionally, it includes a price filter for products.
+   *
+   * @param {number} score - The current score of the game.
+   * @param {number} speed - The current speed setting of the game.
+   * @param {function} setSpeed - Function to update the speed setting. 
+   * @param {boolean} gameOver - Indicates if the game is over.
+   * @param {number} filterPrice - The current price filter value.
+   * @param {function} setFilterPrice - Function to update the price filter.
+   * @returns {JSX.Element} The control panel component.
+   */
+
+
   const user = useSelector(selectUser);
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const isAdmin = useSelector(selectIsAdmin);
@@ -22,8 +39,10 @@ const ControlPanel = ({
 
   // Save highscore when game ends
   useEffect(() => {
+
+    // Update highscore if game is over and user is logged in
     if (gameOver && isLoggedIn) {
-      const isNew = saveHighscore(user.username, score);
+      saveHighscore(user.username, score);
       setHighscore(getHighscore(user.username));
     } else if (isLoggedIn) {
       setHighscore(getHighscore(user.username));

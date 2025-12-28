@@ -6,6 +6,13 @@ import { login as loginAction } from "../../store/slices/userSlice";
 import "./Register.css";
 
 const Register = () => {
+  /*
+  * This component handles user registration functionality
+  * to register as either a standard user or an admin.
+  *
+  * @returns {JSX.Element} The registration form component.
+   */
+  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");

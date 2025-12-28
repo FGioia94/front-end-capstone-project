@@ -10,6 +10,7 @@ const loadCartFromStorage = () => {
   }
 };
 
+// Cart slice
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
