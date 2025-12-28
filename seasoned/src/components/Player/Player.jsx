@@ -2,6 +2,16 @@ import "./Player.css";
 import { useEffect, useRef } from "react";
 
 const Player = ({ playerPos, setPlayerPos, isPaused, gameOver }) => {
+  /*
+  * This component represents the player character in the game.
+  * It handles player movement via arrow keys on desktop and touch/drag on mobile. 
+  * 
+  * @param {object} playerPos - The current position of the player.
+  * @param {function} setPlayerPos - Function to update the player's position.
+  * @param {boolean} isPaused - Indicates if the game is currently paused.
+  * @param {boolean} gameOver - Indicates if the game is over.
+  * @returns {JSX.Element} The player component.
+  */
   const touchStartX = useRef(null);
 
   useEffect(() => {
@@ -33,11 +43,13 @@ const Player = ({ playerPos, setPlayerPos, isPaused, gameOver }) => {
         touchStartX.current = null;
       };
 
+      // Attach touch event listeners
       document.addEventListener("touchstart", handleTouchStart);
       document.addEventListener("touchmove", handleTouchMove);
       document.addEventListener("touchend", handleTouchEnd);
 
       return () => {
+        // Cleanup touch event listeners
         document.removeEventListener("touchstart", handleTouchStart);
         document.removeEventListener("touchmove", handleTouchMove);
         document.removeEventListener("touchend", handleTouchEnd);

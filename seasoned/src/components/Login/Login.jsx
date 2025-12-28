@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { login as loginAction } from "../store/slices/userSlice";
+import { login as loginAction } from "../../store/slices/userSlice";
 import { useNavigate, Link } from "react-router";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import "./Login.css";
 
 const Login = () => {
+  /*
+  * This component handles user login functionality. It verifies user credentials
+  * against stored data in localStorage and manages login state
+  * using Redux. Upon successful login, it redirects the user to the home page.
+  *
+  * @returns {JSX.Element} The login form component.
+  */
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,12 +25,13 @@ const Login = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    // Validate input fields
     if (!username.trim() || !password.trim()) {
       setError("Please fill all fields");
       setSuccess("");
       return;
     }
-
+    // Validate password length
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       setSuccess("");
@@ -33,6 +42,7 @@ const Login = () => {
     const users = JSON.parse(localStorage.getItem("users") || "{}");
     const userData = users[username];
     
+    // Validate user existence and password matcha
     if (!userData) {
       setError("Invalid username or password");
       setSuccess("");

@@ -3,6 +3,12 @@ import { useMemo } from "react";
 import "./SpeedSlider.css";
 
 const SpeedSlider = ({ speed, setSpeed }) => {
+  /*
+   * This component renders a speed slider for adjusting game speed.
+   * @param {number} speed - The current speed value.
+   * @param {function} setSpeed - Function to update the speed value.
+   * @returns {JSX.Element} The speed slider component.
+   */
   const MIN_SPEED = 0.1;
   const MAX_SPEED = 5;
 

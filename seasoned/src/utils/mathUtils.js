@@ -1,3 +1,4 @@
+// Remaps a number from one range to another
 export const remap = (value, inMin, inMax, outMin, outMax) => {
   return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - inMin);
 };

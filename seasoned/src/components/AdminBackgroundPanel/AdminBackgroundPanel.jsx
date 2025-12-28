@@ -3,6 +3,18 @@ import { selectIsAdmin } from "../../store/slices/userSlice";
 import "./AdminBackgroundPanel.css";
 
 const AdminBackgroundPanel = ({ palette, setPalette, opacity, setOpacity }) => {
+  /*
+   * This component renders an admin panel for selecting background palette and opacity.
+   * It is only visible to users with ADMIN privileges.
+   *
+   * @param {string} palette - The selected background palette.
+   * @param {function} setPalette - Function to update the selected palette.
+   * @param {number} opacity - The current opacity level of the background.
+   * @param {function} setOpacity - Function to update the opacity level.
+   * @param {number} opacity - The opacity level of the background.
+   * @returns {JSX.Element|null} The admin background panel component or null if not an admin.
+   */
+
   const isAdmin = useSelector(selectIsAdmin);
 
   if (!isAdmin) return null;

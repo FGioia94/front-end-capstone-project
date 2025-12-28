@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate, Link } from "react-router";
 import { useDispatch } from "react-redux";
-import { login as loginAction } from "../store/slices/userSlice";
+import { login as loginAction } from "../../store/slices/userSlice";
 import "./Register.css";
 
 const Register = () => {

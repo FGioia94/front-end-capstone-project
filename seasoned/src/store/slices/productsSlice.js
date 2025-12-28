@@ -10,6 +10,7 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Products slice
 const productsSlice = createSlice({
   name: 'products',
   initialState: {
@@ -22,6 +23,8 @@ const productsSlice = createSlice({
       state.items = action.payload;
     },
   },
+  // these extraReducers handle the async fetchProducts thunk. 
+  // If the fetch is pending, fulfilled, or rejected, the state is updated accordingly.
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {

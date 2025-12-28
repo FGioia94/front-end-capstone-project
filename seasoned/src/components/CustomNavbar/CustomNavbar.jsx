@@ -1,12 +1,20 @@
 import "./CustomNavbar.css";
 import { Link, useNavigate } from "react-router";
 import Cart from "../Cart/Cart";
-import SearchBar from "./SearchBar";
+import SearchBar from "../SearchBar/SearchBar";
 import { useSelector, useDispatch } from "react-redux";
 import { logout as logoutAction } from "../../store/slices/userSlice";
 import { selectUser, selectIsLoggedIn } from "../../store/slices/userSlice";
 
 const CustomNavbar = () => {
+  /*
+   * This component renders the custom navigation bar.
+   * It contains links to Home, Contacts, Login/Register, and a search bar.
+   * It also displays the username and a logout button when logged in.
+   * 
+   * @returns {JSX.Element} The custom navigation bar component.
+   */
+
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const user = useSelector(selectUser);
   const products = useSelector((state) => state.products.items);

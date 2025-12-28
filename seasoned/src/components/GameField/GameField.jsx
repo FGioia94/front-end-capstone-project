@@ -8,8 +8,8 @@ import Player from "../Player/Player.jsx";
 import "./GameField.css";
 import ControlPanel from "../ControlPanel/ControlPanel.jsx";
 import SortControls from "../SortControls/SortControls.jsx";
-import AdminBackgroundPanel from "./AdminBackgroundPanel.jsx";
-import PriceFilter from "../PriceFilter.jsx";
+import AdminBackgroundPanel from "../AdminBackgroundPanel/AdminBackgroundPanel.jsx";
+import PriceFilter from "../PriceFilter/PriceFilter.jsx";
 import { Form } from "react-bootstrap";
 import { useLocation } from "react-router";
 

@@ -1,11 +1,18 @@
 import { Link } from "react-router";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart, updateCartQuantity } from "../store/slices/cartSlice";
-import CustomNavbar from "./CustomNavbar/CustomNavbar";
+import { removeFromCart, updateCartQuantity } from "../../store/slices/cartSlice";
+import CustomNavbar from "../CustomNavbar/CustomNavbar";
 import "./Checkout.css";
 
 const Checkout = () => {
+  /*
+   * This component renders the checkout page.
+   * It displays the items in the cart, allows quantity updates and item removal, and shows the total amount.`
+   *
+   * @returns {JSX.Element} The checkout component.
+   */
+
   const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
   

@@ -1,9 +1,9 @@
 import { useLocation } from "react-router";
 import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addToCart } from "../store/slices/cartSlice";
-import ProductCard from "./ProductCard/ProductCard";
-import SortControls from "./SortControls/SortControls";
+import { addToCart } from "../../store/slices/cartSlice";
+import ProductCard from "../ProductCard/ProductCard";
+import SortControls from "../SortControls/SortControls";
 import "./SearchResult.css";
 
 const SearchResult = () => {

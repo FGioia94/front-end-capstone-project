@@ -2,6 +2,13 @@ import { useState } from "react";
 import "./Contacts.css";
 
 const Contacts = () => {
+  /*
+   * This component renders the contact us page.
+   * It displays a form for users to send messages and provides contact information.
+   *
+   * @returns {JSX.Element} The contact us component.
+   */
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,24 +29,28 @@ const Contacts = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     } else if (formData.name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters";
     }
 
+    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
+    // Subject validation
     if (!formData.subject.trim()) {
       newErrors.subject = "Subject is required";
     } else if (formData.subject.trim().length < 5) {
       newErrors.subject = "Subject must be at least 5 characters";
     }
 
+    // Message validation
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     } else if (formData.message.trim().length < 10) {
@@ -48,6 +59,7 @@ const Contacts = () => {
       newErrors.message = `Message must be less than ${MAX_MESSAGE_LENGTH} characters`;
     }
 
+    // Terms of Service validation
     if (!tos) {
       newErrors.tos = "You must agree to the Terms of Service";
     }
@@ -58,7 +70,7 @@ const Contacts = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -69,7 +81,7 @@ const Contacts = () => {
     event.preventDefault();
 
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setSuccess("");
@@ -106,11 +118,7 @@ const Contacts = () => {
         <div className="contact-form-card">
           <h2 className="contact-form-title">📬 Send us a Message</h2>
 
-          {success && (
-            <div className="contact-alert success">
-              ✓ {success}
-            </div>
-          )}
+          {success && <div className="contact-alert success">✓ {success}</div>}
 
           {Object.keys(errors).length > 0 && !success && (
             <div className="contact-alert error">
@@ -133,7 +141,13 @@ const Contacts = () => {
                 onChange={handleChange}
               />
               {errors.name && (
-                <div style={{ color: "#fca5a5", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                <div
+                  style={{
+                    color: "#fca5a5",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem",
+                  }}
+                >
                   {errors.name}
                 </div>
               )}
@@ -153,7 +167,13 @@ const Contacts = () => {
                 onChange={handleChange}
               />
               {errors.email && (
-                <div style={{ color: "#fca5a5", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                <div
+                  style={{
+                    color: "#fca5a5",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem",
+                  }}
+                >
                   {errors.email}
                 </div>
               )}
@@ -167,13 +187,21 @@ const Contacts = () => {
                 type="text"
                 id="subject"
                 name="subject"
-                className={`contact-form-input ${errors.subject ? "error" : ""}`}
+                className={`contact-form-input ${
+                  errors.subject ? "error" : ""
+                }`}
                 placeholder="What's this about?"
                 value={formData.subject}
                 onChange={handleChange}
               />
               {errors.subject && (
-                <div style={{ color: "#fca5a5", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                <div
+                  style={{
+                    color: "#fca5a5",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem",
+                  }}
+                >
                   {errors.subject}
                 </div>
               )}
@@ -186,7 +214,9 @@ const Contacts = () => {
               <textarea
                 id="message"
                 name="message"
-                className={`contact-form-textarea ${errors.message ? "error" : ""}`}
+                className={`contact-form-textarea ${
+                  errors.message ? "error" : ""
+                }`}
                 placeholder="Tell us more..."
                 value={formData.message}
                 onChange={handleChange}
@@ -204,7 +234,13 @@ const Contacts = () => {
                 {messageCharsLeft} characters remaining
               </div>
               {errors.message && (
-                <div style={{ color: "#fca5a5", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+                <div
+                  style={{
+                    color: "#fca5a5",
+                    fontSize: "0.85rem",
+                    marginTop: "0.25rem",
+                  }}
+                >
                   {errors.message}
                 </div>
               )}
@@ -230,7 +266,14 @@ const Contacts = () => {
               </label>
             </div>
             {errors.tos && (
-              <div style={{ color: "#fca5a5", fontSize: "0.85rem", marginTop: "-0.75rem", marginBottom: "1rem" }}>
+              <div
+                style={{
+                  color: "#fca5a5",
+                  fontSize: "0.85rem",
+                  marginTop: "-0.75rem",
+                  marginBottom: "1rem",
+                }}
+              >
                 {errors.tos}
               </div>
             )}
@@ -254,7 +297,8 @@ const Contacts = () => {
             <div className="contact-info-item">
               <span className="contact-info-icon">📍</span>
               <span className="contact-info-text">
-                21A, Commerce Street<br />
+                21A, Commerce Street
+                <br />
                 44126 NotAnEcommerceClone HQ
               </span>
             </div>
@@ -274,7 +318,9 @@ const Contacts = () => {
             <div className="contact-info-item">
               <span className="contact-info-icon">📧</span>
               <span className="contact-info-text">
-                <a href="mailto:info@notanecommerceclone.com">info@notanecommerceclone.com</a>
+                <a href="mailto:info@notanecommerceclone.com">
+                  info@notanecommerceclone.com
+                </a>
               </span>
             </div>
           </div>
@@ -287,8 +333,10 @@ const Contacts = () => {
             <div className="contact-info-item">
               <span className="contact-info-icon">🗓️</span>
               <span className="contact-info-text">
-                Monday - Friday: 9:00 AM - 6:00 PM<br />
-                Saturday: 10:00 AM - 4:00 PM<br />
+                Monday - Friday: 9:00 AM - 6:00 PM
+                <br />
+                Saturday: 10:00 AM - 4:00 PM
+                <br />
                 Sunday: Closed
               </span>
             </div>

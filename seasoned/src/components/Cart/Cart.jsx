@@ -1,18 +1,35 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Container, Card, Button } from "react-bootstrap";
 import { Link } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart as removeFromCartAction, updateCartQuantity, addToCart as addToCartAction } from "../../store/slices/cartSlice";
+import {
+  removeFromCart as removeFromCartAction,
+  updateCartQuantity,
+} from "../../store/slices/cartSlice";
 import "./Cart.css";
 
 const Cart = ({ compact = false }) => {
+  /*
+   * This component renders a shopping cart popup.
+   * It can be displayed in a compact mode with a toggle button.
+   *
+   * @param {boolean} compact - Whether to display the cart in compact mode.
+   * @returns {JSX.Element} The cart component.
+   */
+
   const [visible, setVisible] = useState(false);
   const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
 
-  const totalQuantity = (cart || []).reduce((s, it) => s + (it.quantity || 1), 0);
-
+  // Calculate total quantity of items in the cart for badge display
+  // We use reduce to sum up the quantity of each item in the cart.
+  // If an item does not have a quantity, we default to 1.
+  // s=sum accumulator, which is basically the running total, it=item in cart
+  const totalQuantity = (cart || []).reduce(
+    (s, it) => s + (it.quantity || 1),
+    0
+  );
 
   const removeFromCart = (id) => {
     dispatch(removeFromCartAction(id));
@@ -26,10 +43,6 @@ const Cart = ({ compact = false }) => {
     dispatch(updateCartQuantity({ id, quantity: newQuantity }));
   };
 
-  const addToCart = (product) => {
-    dispatch(addToCartAction(product));
-  };
-
   return (
     <>
       {/* TOGGLE BUTTON */}
@@ -40,7 +53,9 @@ const Cart = ({ compact = false }) => {
           onClick={() => setVisible(!visible)}
         >
           <span className="cart-icon">🛒</span>
-          {totalQuantity > 0 && <span className="cart-badge">{totalQuantity}</span>}
+          {totalQuantity > 0 && (
+            <span className="cart-badge">{totalQuantity}</span>
+          )}
         </Button>
       ) : (
         <Button onClick={() => setVisible(!visible)}>Cart</Button>
@@ -51,7 +66,11 @@ const Cart = ({ compact = false }) => {
           <div className="cart-popup">
             <div className="cart-header">
               <h4>Your Cart</h4>
-              <Button variant="light" size="sm" onClick={() => setVisible(false)}>
+              <Button
+                variant="light"
+                size="sm"
+                onClick={() => setVisible(false)}
+              >
                 ✕
               </Button>
             </div>
@@ -62,11 +81,14 @@ const Cart = ({ compact = false }) => {
               {cart.map((prod) => (
                 <Card key={prod.id} className="cart-item">
                   <div className="cart-main">
-                    <Link to={`/product/${prod.id}`} onClick={() => setVisible(false)}>
+                    <Link
+                      to={`/product/${prod.id}`}
+                      onClick={() => setVisible(false)}
+                    >
                       <img src={prod.image} alt={prod.title} />
                     </Link>
                     <div className="cart-info">
-                        <Card.Text className="price">{prod.price}$</Card.Text>
+                      <Card.Text className="price">{prod.price}$</Card.Text>
                     </div>
                   </div>
                   <Card.Body>
@@ -74,15 +96,21 @@ const Cart = ({ compact = false }) => {
                       <Button
                         variant="outline-secondary"
                         size="sm"
-                        onClick={() => updateQuantity(prod.id, (prod.quantity || 1) - 1)}
+                        onClick={() =>
+                          updateQuantity(prod.id, (prod.quantity || 1) - 1)
+                        }
                       >
                         −
                       </Button>
-                      <span className="quantity-display">×{prod.quantity || 1}</span>
+                      <span className="quantity-display">
+                        ×{prod.quantity || 1}
+                      </span>
                       <Button
                         variant="outline-secondary"
                         size="sm"
-                        onClick={() => updateQuantity(prod.id, (prod.quantity || 1) + 1)}
+                        onClick={() =>
+                          updateQuantity(prod.id, (prod.quantity || 1) + 1)
+                        }
                       >
                         +
                       </Button>
@@ -99,15 +127,21 @@ const Cart = ({ compact = false }) => {
               ))}
             </div>
             <div className="cart-footer">
-              <div className="cart-total">Total: ${" "}{cart
-                .reduce(
-                  (sum, it) => sum + (Number(it.price) || 0) * (it.quantity || 1),
-                  0
-                )
-                .toFixed(2)}</div>
+              <div className="cart-total">
+                Total: ${" "}
+                {cart
+                  .reduce(
+                    (sum, it) =>
+                      sum + (Number(it.price) || 0) * (it.quantity || 1),
+                    0
+                  )
+                  .toFixed(2)}
+              </div>
               <div className="cart-actions">
                 <Link to="/checkout" onClick={() => setVisible(false)}>
-                  <Button variant="primary" size="sm">Checkout</Button>
+                  <Button variant="primary" size="sm">
+                    Checkout
+                  </Button>
                 </Link>
               </div>
             </div>

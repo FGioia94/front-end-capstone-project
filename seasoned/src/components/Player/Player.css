@@ -7,12 +7,12 @@
   height: 10px;
   border-radius: 10px;
 
-  /* modern neon-ish gradient with subtle motion */
+  /* neon-ish gradient with subtle motion */
   background: linear-gradient(120deg, #22d3ee 0%, #6366f1 50%, #f472b6 100%);
   background-size: 220% 220%;
   animation: playerGradient 5s ease-in-out infinite alternate;
 
-  /* brighter + soft glow to stand out on the field */
+  /* soft glow to stand out on the field */
   box-shadow:
     0 4px 14px rgba(0,0,0,0.35),
     0 0 14px rgba(99,102,241,0.65),

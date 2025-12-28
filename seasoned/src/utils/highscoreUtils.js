@@ -19,6 +19,7 @@ export const getHighscore = (username) => {
   return stored ? parseInt(stored) : 0;
 };
 
+// Retrieve all highscores, might not use this later, not sure yet
 export const getAllHighscores = () => {
   const scores = [];
   for (let i = 0; i < localStorage.length; i++) {

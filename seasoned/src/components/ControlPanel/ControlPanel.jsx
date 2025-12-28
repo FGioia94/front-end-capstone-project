@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectUser, selectIsLoggedIn, selectIsAdmin } from "../../store/slices/userSlice";
 import { getHighscore, saveHighscore } from "../../utils/highscoreUtils";
-import SpeedSlider from "./SpeedSlider";
-import PriceFilter from "../PriceFilter";
+import SpeedSlider from "../SpeedSlider/SpeedSlider";
+import PriceFilter from "../PriceFilter/PriceFilter";
 import "./ControlPanel.css";
 
 const ControlPanel = ({

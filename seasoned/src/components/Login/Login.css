@@ -147,6 +147,8 @@
   color: #065f46;
 }
 
+/* MOBILE LAYOUT */
+/* IMPORTANT - CHECK THAT THIS WORKS AS EXPECTED BEFORE DELIVER BECAUSE IT WAS DOING SOMETHING WRONG MISALIGNING THE LAYOUT */
 @media (max-width: 576px) {
   .login-card {
     padding: 2rem 1.5rem;

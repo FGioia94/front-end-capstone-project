@@ -2,6 +2,13 @@ import { Form } from "react-bootstrap";
 import "./SortControls.css";
 
 const SortControls = ({ sortBy, setSortBy }) => {
+  /*
+  * This component provides sorting controls for product listings.
+  *
+  * @param {string} sortBy - Current sorting criteria.
+  * @param {function} setSortBy - Function to update sorting criteria.
+  * @returns {JSX.Element} The sort controls component.
+  */
   return (
     <div className="sort-controls">
       <label htmlFor="sort-select" className="sort-label">

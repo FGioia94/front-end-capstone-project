@@ -4,12 +4,12 @@ import CustomNavbar from "./components/CustomNavbar/CustomNavbar";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { useEffect } from "react";
 import { Container } from "react-bootstrap";
-import ProductDetail from "./components/ProductDetail";
-import SearchResult from "./components/SearchResult";
-import Register from "./components/Register";
-import Contacts from "./components/Contacts";
-import Login from "./components/Login";
-import Checkout from "./components/Checkout";
+import ProductDetail from "./components/ProductDetail/ProductDetail";
+import SearchResult from "./components/SearchResult/SearchResult";
+import Register from "./components/Register/Register";
+import Contacts from "./components/Contacts/Contacts";
+import Login from "./components/Login/Login";
+import Checkout from "./components/Checkout/Checkout";
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import store from './store';
 import { fetchProducts } from './store/slices/productsSlice';
@@ -60,6 +60,7 @@ function SearchResultPage() {
   );
 }
 
+// Main App component
 function AppContent() {
   const dispatch = useDispatch();
   const isAdmin = useSelector(selectIsAdmin);
