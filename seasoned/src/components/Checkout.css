@@ -47,3 +47,69 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.08);
 }
+/* Dark mode styles for admin */
+.admin-dark-mode .checkout-wrap {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .checkout-item {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.admin-dark-mode .checkout-item .title {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .muted {
+  color: #94a3b8;
+}
+
+.admin-dark-mode .summary-card {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .checkout-item .btn-outline-secondary {
+  color: #e2e8f0;
+  border-color: #64748b;
+  background: rgba(51, 65, 85, 0.5);
+}
+
+.admin-dark-mode .checkout-item .btn-outline-secondary:hover {
+  background: rgba(71, 85, 105, 0.8);
+  border-color: #94a3b8;
+  color: #f1f5f9;
+}
+
+.admin-dark-mode .checkout-item .btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: none;
+  color: #fff;
+}
+
+.admin-dark-mode .checkout-item .btn-danger:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.admin-dark-mode .summary-card .btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin-dark-mode .summary-card .btn-success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.admin-dark-mode .checkout-link {
+  color: #e2e8f0;
+}
+
+.admin-dark-mode .checkout-link:hover {
+  color: #a5b4fc;
+}

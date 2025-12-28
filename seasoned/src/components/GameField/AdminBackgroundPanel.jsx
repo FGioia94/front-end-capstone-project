@@ -1,8 +1,9 @@
-import { useUser } from "../../context/UserContext";
+import { useSelector } from "react-redux";
+import { selectIsAdmin } from "../../store/slices/userSlice";
 import "./AdminBackgroundPanel.css";
 
 const AdminBackgroundPanel = ({ palette, setPalette, opacity, setOpacity }) => {
-  const { isAdmin } = useUser();
+  const isAdmin = useSelector(selectIsAdmin);
 
   if (!isAdmin) return null;
 

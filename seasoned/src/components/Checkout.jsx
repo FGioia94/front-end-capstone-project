@@ -1,31 +1,29 @@
 import { Link } from "react-router";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart, updateCartQuantity } from "../store/slices/cartSlice";
 import CustomNavbar from "./CustomNavbar/CustomNavbar";
 import "./Checkout.css";
 
-const Checkout = ({ cart, setCart, products }) => {
+const Checkout = () => {
+  const cart = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
+  
   const total = cart.reduce(
     (sum, it) => sum + (Number(it.price) || 0) * (it.quantity || 1),
     0
   );
 
-  const persist = (nextCart) => {
-    sessionStorage.setItem("cart", JSON.stringify(nextCart));
-    setCart(nextCart);
-  };
-
   const updateQuantity = (id, newQty) => {
     if (newQty <= 0) {
-      removeFromCart(id);
+      handleRemoveFromCart(id);
       return;
     }
-    const next = cart.map((it) => (it.id === id ? { ...it, quantity: newQty } : it));
-    persist(next);
+    dispatch(updateCartQuantity({ id, quantity: newQty }));
   };
 
-  const removeFromCart = (id) => {
-    const next = cart.filter((it) => it.id !== id);
-    persist(next);
+  const handleRemoveFromCart = (id) => {
+    dispatch(removeFromCart(id));
   };
 
   const handlePay = () => {
@@ -36,7 +34,7 @@ const Checkout = ({ cart, setCart, products }) => {
 
   return (
     <>
-      <CustomNavbar products={products} cart={cart} setCart={setCart} />
+      <CustomNavbar />
       <Container className="checkout-wrap mt-4">
         <h2 className="mb-3">Checkout</h2>
         <Row>
@@ -65,7 +63,7 @@ const Checkout = ({ cart, setCart, products }) => {
                       <Button size="sm" variant="outline-secondary" onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}>
                         +
                       </Button>
-                      <Button size="sm" variant="danger" className="ms-3" onClick={() => removeFromCart(item.id)}>
+                      <Button size="sm" variant="danger" className="ms-3" onClick={() => handleRemoveFromCart(item.id)}>
                         Remove
                       </Button>
                     </div>

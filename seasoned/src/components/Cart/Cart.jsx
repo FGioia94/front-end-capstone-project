@@ -2,25 +2,20 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Container, Card, Button } from "react-bootstrap";
 import { Link } from "react-router";
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart as removeFromCartAction, updateCartQuantity, addToCart as addToCartAction } from "../../store/slices/cartSlice";
 import "./Cart.css";
 
-const Cart = ({ cart, setCart, compact = false }) => {
+const Cart = ({ compact = false }) => {
   const [visible, setVisible] = useState(false);
+  const cart = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
 
   const totalQuantity = (cart || []).reduce((s, it) => s + (it.quantity || 1), 0);
 
-  useEffect(() => {
-    const storedProducts = sessionStorage.getItem("cart");
-    if (storedProducts) {
-      setCart(JSON.parse(storedProducts));
-    }
-  }, []);
-
 
   const removeFromCart = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    sessionStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCart(updatedCart);
+    dispatch(removeFromCartAction(id));
   };
 
   const updateQuantity = (id, newQuantity) => {
@@ -28,27 +23,11 @@ const Cart = ({ cart, setCart, compact = false }) => {
       removeFromCart(id);
       return;
     }
-    const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    sessionStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCart(updatedCart);
+    dispatch(updateCartQuantity({ id, quantity: newQuantity }));
   };
 
   const addToCart = (product) => {
-    const existingItem = cart.find((item) => item.id === product.id);
-    let updatedCart;
-    if (existingItem) {
-      updatedCart = cart.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: (item.quantity || 1) + 1 }
-          : item
-      );
-    } else {
-      updatedCart = [...cart, { ...product, quantity: 1 }];
-    }
-    sessionStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCart(updatedCart);
+    dispatch(addToCartAction(product));
   };
 
   return (

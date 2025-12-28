@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useDispatch } from "react-redux";
+import { login as loginAction } from "../store/slices/userSlice";
 import { useNavigate, Link } from "react-router";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import "./Login.css";
@@ -10,7 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const { login } = useUser();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
@@ -45,7 +46,7 @@ const Login = () => {
     }
 
     // Login with automatic role detection
-    login(username, userData.role);
+    dispatch(loginAction({ username, role: userData.role }));
     setError("");
     setSuccess(`Logged in successfully as ${userData.role}! Redirecting...`);
 

@@ -1,6 +1,7 @@
 import { Button } from "react-bootstrap";
 import { useState, useEffect } from "react";
-import { useUser } from "../../context/UserContext";
+import { useSelector } from "react-redux";
+import { selectUser, selectIsLoggedIn, selectIsAdmin } from "../../store/slices/userSlice";
 import { getHighscore, saveHighscore } from "../../utils/highscoreUtils";
 import SpeedSlider from "./SpeedSlider";
 import PriceFilter from "../PriceFilter";
@@ -14,7 +15,9 @@ const ControlPanel = ({
   filterPrice,
   setFilterPrice,
 }) => {
-  const { user, isLoggedIn, isAdmin } = useUser();
+  const user = useSelector(selectUser);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const isAdmin = useSelector(selectIsAdmin);
   const [highscore, setHighscore] = useState(0);
 
   // Save highscore when game ends

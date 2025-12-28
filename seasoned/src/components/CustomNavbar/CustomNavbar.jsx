@@ -2,21 +2,24 @@ import "./CustomNavbar.css";
 import { Link, useNavigate } from "react-router";
 import Cart from "../Cart/Cart";
 import SearchBar from "./SearchBar";
-import { useUser } from "../../context/UserContext";
+import { useSelector, useDispatch } from "react-redux";
+import { logout as logoutAction } from "../../store/slices/userSlice";
+import { selectUser, selectIsLoggedIn } from "../../store/slices/userSlice";
 
-const CustomNavbar = ({ products, cart, setCart, setGameMode }) => {
-  const { isLoggedIn, user, logout } = useUser();
+const CustomNavbar = () => {
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const user = useSelector(selectUser);
+  const products = useSelector((state) => state.products.items);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
+    dispatch(logoutAction());
     navigate("/");
   };
 
   const handleHomeClick = () => {
-    if (setGameMode) {
-      setGameMode(false);
-    }
+    // Navigation handled by router
   };
 
   return (
@@ -50,7 +53,7 @@ const CustomNavbar = ({ products, cart, setCart, setGameMode }) => {
                 Not a user yet? <Link to={"/register"}>Sign In</Link>
               </>
             )}
-            <Cart cart={cart} setCart={setCart} compact={true} />
+            <Cart compact={true} />
           </li>
         </ul>
       </nav>

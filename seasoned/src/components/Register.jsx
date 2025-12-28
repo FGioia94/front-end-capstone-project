@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate, Link } from "react-router";
-import { useUser } from "../context/UserContext";
+import { useDispatch } from "react-redux";
+import { login as loginAction } from "../store/slices/userSlice";
 import "./Register.css";
 
 const Register = () => {
@@ -14,7 +15,7 @@ const Register = () => {
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
-  const { login } = useUser();
+  const dispatch = useDispatch();
 
   const handleSubmit = (event) => {
     event.preventDefault();

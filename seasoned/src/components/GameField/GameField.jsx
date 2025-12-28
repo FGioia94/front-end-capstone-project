@@ -1,6 +1,8 @@
 import ProductCard from "../ProductCard/ProductCard";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useUser } from "../../context/UserContext";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectIsAdmin } from "../../store/slices/userSlice";
+import { addToCart as addToCartAction } from "../../store/slices/cartSlice";
 import { mulberry32, remap } from "../../utils/mathUtils.js";
 import Player from "../Player/Player.jsx";
 import "./GameField.css";
@@ -9,21 +11,21 @@ import SortControls from "../SortControls/SortControls.jsx";
 import AdminBackgroundPanel from "./AdminBackgroundPanel.jsx";
 import PriceFilter from "../PriceFilter.jsx";
 import { Form } from "react-bootstrap";
+import { useLocation } from "react-router";
 
 const getPlayerWidth = () => window.innerWidth <= 768 ? 30 : 50;
 const getPlayerHeight = () => window.innerWidth <= 768 ? 6 : 10;
 
-const GameField = ({
-  products,
-  setProducts,
-  setCart,
-  filterPrice,
-  setFilterPrice,
-  addToCart,
-  gameMode,
-  setGameMode,
-}) => {
-  const { isAdmin } = useUser();
+const GameField = () => {
+  const { isAdmin, products } = useSelector((state) => ({
+    isAdmin: selectIsAdmin(state),
+    products: state.products.items
+  }));
+  const dispatch = useDispatch();
+  const location = useLocation();
+  
+  const [filterPrice, setFilterPrice] = useState([795, 100000]);
+  const [gameMode, setGameMode] = useState(false);
 
   const [containerSize, setContainerSize] = useState({
     width: 0,
@@ -57,11 +59,15 @@ const GameField = ({
   const manualPauseRef = useRef(false);
 
   // Create a safe setSpeed that only allows admins to change speed
-  const safeSetSpeed = (newSpeed) => {
+  const safeSetSpeed = useCallback((newSpeed) => {
     if (isAdmin) {
       setSpeed(newSpeed);
     }
-  };
+  }, [isAdmin]);
+  
+  const addToCart = useCallback((product) => {
+    dispatch(addToCartAction(product));
+  }, [dispatch]);
 
   const filteredProducts = useMemo(() => {
     let result = products.filter(
@@ -90,30 +96,19 @@ const GameField = ({
   }, [products, filterPrice, sortBy]);
 
   const loading = products.length === 0;
+  // Reset game mode when component mounts or location changes
+  useEffect(() => {
+    setGameMode(false);
+  }, [location.pathname]);
   
-  useEffect(() => {
-    positionsRef.current = positions;
-  }, [positions]);
-
-  useEffect(() => {
-    sizesRef.current = sizes;
-  }, [sizes]);
-
-  useEffect(() => {
-    playerPosRef.current = playerPos;
-  }, [playerPos]);
-
-  useEffect(() => {
-    speedRef.current = actualSpeed;
-  }, [actualSpeed]);
-
-  useEffect(() => {
-    gameOverRef.current = gameOver;
-  }, [gameOver]);
-
-  useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
+  // 
+  // Sync refs inline to avoid extra effect runs
+  positionsRef.current = positions;
+  sizesRef.current = sizes;
+  playerPosRef.current = playerPos;
+  speedRef.current = actualSpeed;
+  gameOverRef.current = gameOver;
+  isPausedRef.current = isPaused;
 
   // Reset speed to 1 when admin logs out during game
   useEffect(() => {
@@ -210,7 +205,7 @@ const GameField = ({
 
   // updateContainerSize is used in multiple places (initial measurement,
   // on resize, and when switching modes) so keep it at component scope.
-  const updateContainerSize = () => {
+  const updateContainerSize = useCallback(() => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setContainerSize({
@@ -218,7 +213,7 @@ const GameField = ({
         height: rect.height,
       });
     }
-  };
+  }, []);
 
   useEffect(() => {
     updateContainerSize();
@@ -265,21 +260,26 @@ const GameField = ({
 
   const updateSize = (id, size) => {
     setSizes((prev) => {
+      // Only update if the product doesn't already have a size
+      if (prev[id]) return prev;
       const next = { ...prev, [id]: size };
       sizesRef.current = next;
       return next;
     });
   };
 
-  const updateCardSizes = () => {
+  const updateCardSizes = useCallback(() => {
     filteredProducts.forEach((prod) => {
-      updateSize(prod.id, getCardSize(prod.price));
+      // Only calculate size if it doesn't exist
+      if (!sizesRef.current[prod.id]) {
+        updateSize(prod.id, getCardSize(prod.price));
+      }
     });
-  };
+  }, [filteredProducts]);
 
   useEffect(() => {
     updateCardSizes();
-  }, [products]);
+  }, [updateCardSizes]);
 
   const generateRandomPositions = (element, maxHeight, maxWidth) => {
     const size = sizesRef.current[element.id];
@@ -519,39 +519,55 @@ const GameField = ({
   }, [gameMode, filterPrice, containerSize]);
 
   useEffect(() => {
-    if (gameMode && Object.keys(sizes).length === filteredProducts.length) {
+    if (gameMode && Object.keys(sizes).length > 0 && Object.keys(positions).length === 0) {
+      // Only initialize if we don't have positions yet
       initializeGame();
     }
   }, [gameMode, sizes, containerSize, products]);
   console.log("RENDER GAMEFIELD");
   
-  // Hide the PriceFilter in App.jsx when in game mode
-  useEffect(() => {
-    const priceFilterInApp = document.querySelector('.price-filter');
-    if (priceFilterInApp && priceFilterInApp.parentElement) {
-      if (gameMode) {
-        priceFilterInApp.style.display = 'none';
-      } else {
-        priceFilterInApp.style.display = '';
-      }
-    }
-  }, [gameMode]);
-  
   return (
     <div className={gameMode ? "no-scroll game-mode-layout" : ""}>
       {!gameMode && (
-        <div className="product-controls">
-          <SortControls sortBy={sortBy} setSortBy={setSortBy} />
+        <div
+          ref={containerRef}
+          id="game-field"
+          style={{ '--game-bg': backgroundImage }}
+          className="product-display"
+        >
+          <div className="product-controls">
+            <PriceFilter filterPrice={filterPrice} setFilterPrice={setFilterPrice} />
+            <SortControls sortBy={sortBy} setSortBy={setSortBy} />
+          </div>
+          
+          {loading ? (
+            // show skeletons while loading
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="product-card skeleton" />
+            ))
+          ) : (
+            filteredProducts.map((prod, i) => {
+              return (
+                <ProductCard
+                  key={prod.id}
+                  prod={prod}
+                  gameMode={false}
+                  addToCart={addToCart}
+                  cardStyle={{ animationDelay: `${i * 60}ms` }}
+                />
+              );
+            })
+          )}
         </div>
       )}
-
-      <div
-        ref={containerRef}
-        id="game-field"
-        style={{ '--game-bg': backgroundImage }}
-        className={gameMode ? "game-display" : "product-display"}
-      >
-        {gameMode && (
+      
+      {gameMode && (
+        <div
+          ref={containerRef}
+          id="game-field"
+          style={{ '--game-bg': backgroundImage }}
+          className="game-display"
+        >
           <ControlPanel 
             score={score} 
             speed={speed} 
@@ -560,24 +576,17 @@ const GameField = ({
             filterPrice={filterPrice}
             setFilterPrice={setFilterPrice}
           />
-        )}
 
-        {gameMode && isAdmin && window.innerWidth > 768 && (
-          <AdminBackgroundPanel
-            palette={adminBgPalette}
-            setPalette={setAdminBgPalette}
-            opacity={adminBgOpacity}
-            setOpacity={setAdminBgOpacity}
-          />
-        )}
+          {isAdmin && window.innerWidth > 768 && (
+            <AdminBackgroundPanel
+              palette={adminBgPalette}
+              setPalette={setAdminBgPalette}
+              opacity={adminBgOpacity}
+              setOpacity={setAdminBgOpacity}
+            />
+          )}
 
-        {loading && !gameMode ? (
-          // show skeletons while loading
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="product-card skeleton" />
-          ))
-        ) : (
-          filteredProducts.map((prod, i) => {
+          {filteredProducts.map((prod, i) => {
             const pos = positions[prod.id];
             const size = sizes[prod.id];
             let danger = 0;
@@ -608,30 +617,40 @@ const GameField = ({
                 size={sizes[prod.id]}
                 prod={prod}
                 gameMode={gameMode}
-                setCart={setCart}
                 addToCart={addToCart}
                 setIsPaused={setIsPaused}
                 manualPauseRef={manualPauseRef}
                 cardStyle={{ animationDelay: `${i * 60}ms`, "--danger": danger }}
               />
             );
-          })
-        )}
-        {gameMode && (
+          })}
+          
           <Player playerPos={playerPos} setPlayerPos={setPlayerPos} isPaused={isPaused} gameOver={gameOver} />
-        )}
-        
-        <button
-          className="game-mode-toggle-btn"
-          onClick={() => {
-            if (!gameMode) initializeGame();
-            setGameMode(!gameMode);
-          }}
-          disabled={!backgroundImageLoaded}
-        >
-          {!backgroundImageLoaded ? "Loading..." : gameMode ? "Product Mode" : "Game Mode"}
-        </button>
-      </div>
+          
+          <button
+            className="game-mode-toggle-btn"
+            onClick={() => {
+              if (!gameMode) initializeGame();
+              setGameMode(!gameMode);
+            }}
+            disabled={!backgroundImageLoaded}
+          >
+            {!backgroundImageLoaded ? "Loading..." : "Product Mode"}
+          </button>
+        </div>
+      )}
+      
+      <button
+        className="game-mode-toggle-btn"
+        onClick={() => {
+          if (!gameMode) initializeGame();
+          setGameMode(!gameMode);
+        }}
+        disabled={!backgroundImageLoaded}
+        style={{ display: gameMode ? 'none' : 'block' }}
+      >
+        {!backgroundImageLoaded ? "Loading..." : "Game Mode"}
+      </button>
 
       {gameOver && gameMode && (
         <div className="game-over-overlay">

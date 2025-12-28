@@ -1,27 +1,29 @@
 import { Container, Button, Row, Col } from "react-bootstrap";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../store/slices/cartSlice";
 import CustomNavbar from "./CustomNavbar/CustomNavbar";
 import { useParams } from "react-router";
 import "./ProductDetail.css";
-const ProductDetail = ({ products, cart, setCart, addToCart }) => {
-  // Why fetching here again?
-  // Even though it might be better performance-wise to just lift the state up
-  // passing an object with all the data, this would fail if the user tries to reach
-  // for the page by typing the specific URL, without reaching the home page first
-  const { id } = useParams();
-  // const [productData, setProductData] = useState();
 
-  if (!products || products.length === 0) {
+const ProductDetail = () => {
+  const { id } = useParams();
+  const products = useSelector((state) => state.products.items);
+  const loading = useSelector((state) => state.products.loading);
+  const dispatch = useDispatch();
+
+  if (loading || !products || products.length === 0) {
     return <p>Loading...</p>;
   }
 
   const productData = products[id-1];
+  
   const handleAdd = () => {
-    if (addToCart) addToCart(productData);
+    dispatch(addToCart(productData));
   };
 
   return (
     <>
-      <CustomNavbar products={products} cart={cart} setCart={setCart} />
+      <CustomNavbar />
       <Container className="product-detail-container">
         <Row className="justify-content-center">
           <Col lg={8}>

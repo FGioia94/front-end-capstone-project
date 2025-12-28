@@ -1,17 +1,30 @@
 import { useLocation } from "react-router";
 import { useState, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../store/slices/cartSlice";
 import ProductCard from "./ProductCard/ProductCard";
 import SortControls from "./SortControls/SortControls";
 import "./SearchResult.css";
-const SearchResult = ({ products, setCart}) => {
+
+const SearchResult = () => {
   const [sortBy, setSortBy] = useState("default");
+  const products = useSelector((state) => state.products.items);
+  const loading = useSelector((state) => state.products.loading);
+  const dispatch = useDispatch();
+  
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const searchText = params.get("q");
+  
   console.log(searchText);
-  if (!products || products.length === 0) {
+  
+  if (loading || !products || products.length === 0) {
     return <p>Loading...</p>;
   }
+  
+  const handleAddToCart = (product) => {
+    dispatch(addToCart(product));
+  };
   const matchingProducts = useMemo(() => {
     let result = products.filter((prod) => {
       return (
@@ -62,7 +75,7 @@ const SearchResult = ({ products, setCart}) => {
               size={1}
               prod={prod}
               gameMode={false}
-              setCart={setCart}
+              addToCart={handleAddToCart}
             />
           ))
         ) : (

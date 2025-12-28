@@ -2,7 +2,7 @@ import GameField from "./components/GameField/GameField";
 import "./App.css";
 import CustomNavbar from "./components/CustomNavbar/CustomNavbar";
 import { BrowserRouter, Routes, Route } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Container } from "react-bootstrap";
 import ProductDetail from "./components/ProductDetail";
 import SearchResult from "./components/SearchResult";
@@ -10,228 +10,86 @@ import Register from "./components/Register";
 import Contacts from "./components/Contacts";
 import Login from "./components/Login";
 import Checkout from "./components/Checkout";
-import PriceFilter from "./components/PriceFilter";
-import { UserProvider, useUser } from "./context/UserContext";
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import store from './store';
+import { fetchProducts } from './store/slices/productsSlice';
+import { selectIsAdmin } from './store/slices/userSlice';
 
-function Home({ products, setProducts, cart, setCart, addToCart }) {
-  const [filterPrice, setFilterPrice] = useState([795, 100000]);
-  const [gameMode, setGameMode] = useState(false);
-  
+function Home() {
   return (
     <>
-      <CustomNavbar
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-        setGameMode={setGameMode}
-      ></CustomNavbar>
-      <PriceFilter
-        filterPrice={filterPrice}
-        setFilterPrice={setFilterPrice}
-      ></PriceFilter>
-      <GameField
-        products={products}
-        setProducts={setProducts}
-        setCart={setCart}
-        filterPrice={filterPrice}
-        setFilterPrice={setFilterPrice}
-        addToCart={addToCart}
-        gameMode={gameMode}
-        setGameMode={setGameMode}
-      ></GameField>
+      <CustomNavbar />
+      <GameField />
     </>
   );
 }
 
-function ContactsPage({ products, setProducts, cart, setCart }) {
+function ContactsPage() {
   return (
     <>
-      <CustomNavbar
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-      ></CustomNavbar>
-      <Contacts></Contacts>
+      <CustomNavbar />
+      <Contacts />
     </>
   );
 }
 
-function LoginPage({ products, setProducts, cart, setCart }) {
+function LoginPage() {
   return (
     <>
-      <CustomNavbar
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-      ></CustomNavbar>
-      <Login></Login>
+      <CustomNavbar />
+      <Login />
     </>
   );
 }
 
-function RegisterPage({ products, setProducts, cart, setCart }) {
+function RegisterPage() {
   return (
     <>
-      <CustomNavbar
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-      ></CustomNavbar>
-      <Register></Register>
+      <CustomNavbar />
+      <Register />
     </>
   );
 }
 
-function SearchResultPage({ products, setProducts, cart, setCart }) {
+function SearchResultPage() {
   return (
     <>
-      <CustomNavbar
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-      ></CustomNavbar>
-      <SearchResult
-        key={products.length}
-        products={products}
-        cart={cart}
-        setCart={setCart}
-      ></SearchResult>
+      <CustomNavbar />
+      <SearchResult />
     </>
   );
 }
-function App() {
-  const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState([]);
+
+function AppContent() {
+  const dispatch = useDispatch();
+  const isAdmin = useSelector(selectIsAdmin);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await fetch("https://fakestoreapi.com/products");
-      const data = await response.json();
-      setProducts(data);
-    };
-
-    fetchProducts();
-  }, []);
-
-  const addToCart = (product) => {
-    const stored = sessionStorage.getItem("cart") || "[]";
-    const currentCart = JSON.parse(stored);
-    const existingItem = currentCart.find((item) => item.id === product.id);
-
-    let updatedCart;
-    if (existingItem) {
-      updatedCart = currentCart.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: (item.quantity || 1) + 1 }
-          : item
-      );
-    } else {
-      updatedCart = [...currentCart, { ...product, quantity: 1 }];
-    }
-
-    sessionStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCart(updatedCart);
-  };
-
-  return (
-    <UserProvider>
-      <AppContent 
-        products={products}
-        setProducts={setProducts}
-        cart={cart}
-        setCart={setCart}
-        addToCart={addToCart}
-      />
-    </UserProvider>
-  );
-}
-
-function AppContent({ products, setProducts, cart, setCart, addToCart }) {
-  const { isAdmin } = useUser();
+    dispatch(fetchProducts());
+  }, [dispatch]);
+  
   return (
     <div className={isAdmin ? "admin-dark-mode" : ""}>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Home
-                products={products}
-                setProducts={setProducts}
-                cart={cart}
-                setCart={setCart}
-                addToCart={addToCart}
-              />
-            }
-          />
-        <Route
-          path="/contacts"
-          element={
-            <ContactsPage
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <LoginPage
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <RegisterPage
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/product/:id"
-          element={
-            <ProductDetail
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-              addToCart={addToCart}
-            />
-          }
-        />
-        <Route
-          path="/search"
-          element={
-            <SearchResultPage
-              products={products}
-              setProducts={setProducts}
-              cart={cart}
-              setCart={setCart}
-            />
-          }
-        />
-        <Route
-          path="/checkout"
-          element={<Checkout products={products} cart={cart} setCart={setCart} />}
-        />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/" element={<Home />} />
+          <Route path="/contacts" element={<ContactsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/search" element={<SearchResultPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+        </Routes>
+      </BrowserRouter>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }
 
