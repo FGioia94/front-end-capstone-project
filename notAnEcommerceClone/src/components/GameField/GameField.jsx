@@ -30,10 +30,8 @@ const GameField = () => {
    */
 
   // Redux selectors and dispatch
-  const { isAdmin, products } = useSelector((state) => ({
-    isAdmin: selectIsAdmin(state),
-    products: state.products.items,
-  }));
+  const isAdmin = useSelector(selectIsAdmin);
+  const products = useSelector((state) => state.products.items);
   const dispatch = useDispatch();
   const location = useLocation();
   const [filterPrice, setFilterPrice] = useState([795, 100000]);

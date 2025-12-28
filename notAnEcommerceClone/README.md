@@ -1,161 +1,206 @@
-# 🛒 NotAnEcommerceClone
+# notAnEcommerceClone
 
-A modern, interactive e-commerce web application built with React that transforms online shopping into an engaging gaming experience. Browse high-end culinary products in a beautiful interface, or challenge yourself in Game Mode where you dodge falling products while shopping!
+A React-based e-commerce application with an innovative game mode twist. This project combines traditional online shopping functionality with an interactive gaming experience where products behave like blocks falling down! Built as my front-end course capstone project at EPICODE.
 
-## 🎮 Features
+## 🎯 Overview
 
-### Product Browsing
-- **Product Catalog**: Browse a curated selection of premium culinary products
-- **Search Functionality**: Real-time search with instant results
-- **Advanced Filtering**: Filter products by price range
-- **Sorting Options**: Sort by name (A-Z, Z-A) or price (low-high, high-low)
-- **Product Details**: Detailed view for each product with full descriptions
-- **Shopping Cart**: Add items to cart, adjust quantities, remove items
-- **Checkout System**: Complete purchase flow with order summary
+notAnEcommerceClone is a full-featured e-commerce platform that fetches real product data from the Fake Store API. Users can browse, search, filter, and purchase products just like any traditional online store (Well, not really purchase as no payment gateway is implemented - i thought that wasa bit out of scope). But here's the twist: switch to Game Mode and the shopping experience becomes an arcade-style game where you dodge falling products while they rain down from above!
 
-### Game Mode 🕹️
-- **Interactive Gameplay**: Dodge falling products while browsing
-- **Progressive Difficulty**: Speed increases over time for added challenge
-- **Score Tracking**: Compete for high scores
-- **Collision Detection**: Sophisticated physics for smooth gameplay
-- **Pause/Resume**: Press ESC to pause/resume game
-- **Danger Indicator**: Products glow red when close to the player
-- **Mobile Responsive**: Optimized controls for touch devices
+## ✨ Features
 
-### Admin Features 👑
-- **Speed Control**: Adjust game speed (1x - 3x multiplier)
-- **Background Customization**: Choose from 5 dynamic color palettes
-  - Vibrant (purple/red/yellow)
-  - Cool (blue/cyan/purple)
-  - Warm (orange/red/yellow)
-  - Sunset (pink/orange/yellow)
-  - Forest (green tones)
-- **Opacity Control**: Fine-tune background transparency (0-100%)
-- **Dark Mode UI**: Automatic dark theme with high-contrast buttons
-- **Admin Badge**: Visible ⚡ Admin Mode indicator
+### Product Browsing & Shopping
+- **Product Catalog**: Browse a complete catalog of products fetched from the Fake Store API
+- **Advanced Search**: Real-time search functionality to find products quickly
+- **Price Filtering**: Filter products by price range with an intuitive slider interface
+- **Sorting Options**: Sort products by price, title, category, or rating
+- **Product Details**: View detailed product information including images, descriptions, and ratings
+- **Shopping Cart**: 
+  - Add products to cart with automatic quantity management
+  - Update quantities or remove items
+  - Cart persists across sessions using sessionStorage
+  - Real-time cart total calculation
 
-### User Experience
-- **Authentication**: Login/Register system with role-based access
-- **Session Persistence**: Cart and user state persist across sessions
-- **Responsive Design**: Fully optimized for desktop, tablet, and mobile
-- **Loading States**: Skeleton screens for better perceived performance
-- **Smooth Animations**: Polished transitions and micro-interactions
+### User Authentication
+- **Registration System**: Create new user accounts with username and password
+- **Login/Logout**: Secure authentication with persistent sessions using localStorage - There are three types of users: Not logged in, standard login, admin login, with different permissions.
+- **Role-Based Access**: Support for regular users and admin roles
+- **User Context**: Global user state management for seamless auth experience
+
+### Game Mode 🎮
+- **Interactive Gameplay**: Products fall from the top of the screen at varying speeds
+- **Player Controls**: Move your player left and right to avoid colliding with falling products
+- **Collision Detection**: collision physics between player and products
+- **Score Tracking**: Earn points for survival time
+- **Speed Control**: Adjust game speed with a real-time slider
+- **Pause/Resume**: Pause the game at any time
+- **High Score System**: Track and display high scores with persistence
+- **Game Over State**: Clear game over UI with score display and restart options
+
+### Admin Features
+- **Admin Dashboard**: Special control panel visible only to admin users
+- **Background Controls**: Customize the game field background
+- **Enhanced Permissions**: Additional controls and settings for store management
+
+### Responsive Design
+- **Mobile-Friendly**: Fully responsive layout that works on all device sizes
+- **Bootstrap Integration**: Professional UI components and styling
+- **Custom CSS**: Tailored styling for unique components and game elements
+- **Adaptive Controls**: Player size and controls adjust for mobile devices
 
 ## 🛠️ Tech Stack
 
-- **React 19.2.0** - Latest React with improved hooks and performance
-- **Redux Toolkit 2.11.2** - Modern Redux with built-in Thunk middleware
+### Core Technologies
+- **React 19.2.0** - Modern React with latest features and hooks
+- **Redux Toolkit 2.11.2** - Centralized state management with slices
 - **React Redux 9.2.0** - React bindings for Redux
 - **React Router 7.11.0** - Client-side routing and navigation
-- **React Bootstrap 2.10.10** - UI components with Bootstrap styling
-- **Vite 7.2.4** - Fast build tool with HMR
-- **SWC** - Lightning-fast JavaScript/TypeScript compiler
 
-## 📦 Installation
+### UI & Styling
+- **Bootstrap 5.3.8** - Responsive component library
+- **React Bootstrap 2.10.10** - Bootstrap components as React components
+- **normalize.css** - CSS reset for consistent styling across browsers
+- **Custom CSS** - Component-specific styling
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/front-end-capstone-project.git
-   cd front-end-capstone-project/seasoned
-   ```
+### Build Tools & Development
+- **Vite 4.2.2** - Lightning-fast build tool and dev server
+- **@vitejs/plugin-react-swc** - Fast Refresh using SWC
+- **ESLint 9.39.1** - Code linting and quality checks
+- **eslint-plugin-react-hooks** - React hooks linting rules
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:5173`
-
-## 🚀 Available Scripts
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint to check code quality
-
-## 👨‍💼 Admin Access
-
-To test admin features, see [ADMIN_ACCESS.md](./ADMIN_ACCESS.md) for detailed instructions.
-
-**Quick admin setup:**
-1. Open browser console (F12)
-2. Run:
-   ```javascript
-   localStorage.setItem('user', JSON.stringify({username: 'admin', role: 'admin', loginTime: new Date().toISOString()}))
-   ```
-3. Refresh the page
+### External APIs
+- **Fake Store API** - Product data source (https://fakestoreapi.com)
 
 ## 📁 Project Structure
 
 ```
-seasoned/
-├── public/              # Static assets
+notAnEcommerceClone/
+├── public/                      # Static assets
 ├── src/
-│   ├── assets/          # Images, icons
-│   ├── components/      # React components
-│   │   ├── Cart/        # Shopping cart component
-│   │   ├── ControlPanel/ # Game controls
-│   │   ├── CustomNavbar/ # Navigation bar
-│   │   ├── GameField/   # Main game/product display
-│   │   ├── Player/      # Game player character
-│   │   ├── ProductCard/ # Product display cards
-│   │   └── SortControls/ # Sorting interface
-│   ├── store/           # Redux store configuration
-│   │   └── slices/      # Redux slices (cart, products, user)
-│   ├── utils/           # Utility functions
-│   ├── App.jsx          # Main app component
-│   ├── App.css          # Global styles
-│   └── main.jsx         # Application entry point
-├── index.html           # HTML template
-├── package.json         # Dependencies and scripts
-└── vite.config.js       # Vite configuration
+│   ├── assets/                 # Images, fonts, and other assets
+│   ├── components/             # React components
+│   │   ├── AdminBackgroundPanel/   # Admin background customization
+│   │   ├── Cart/                    # Shopping cart component
+│   │   ├── Checkout/                # Checkout process
+│   │   ├── Contacts/                # Contact information
+│   │   ├── ControlPanel/            # Game control panel
+│   │   ├── CustomNavbar/            # Navigation bar
+│   │   ├── GameField/               # Main game/product display
+│   │   ├── Login/                   # Login form
+│   │   ├── Player/                  # Game player component
+│   │   ├── PriceFilter/             # Price range filter
+│   │   ├── ProductCard/             # Individual product card
+│   │   ├── ProductDetail/           # Detailed product view
+│   │   ├── Register/                # Registration form
+│   │   ├── SearchBar/               # Product search
+│   │   ├── SearchResult/            # Search results display
+│   │   ├── SortControls/            # Product sorting controls
+│   │   └── SpeedSlider/             # Game speed control
+│   ├── context/                # React Context providers
+│   │   └── UserContext.jsx         # User authentication context
+│   ├── store/                  # Redux store configuration
+│   │   ├── index.js               # Store setup
+│   │   └── slices/                # Redux slices
+│   │       ├── cartSlice.js       # Shopping cart state
+│   │       ├── productsSlice.js   # Products state & API calls
+│   │       └── userSlice.js       # User authentication state
+│   ├── utils/                  # Utility functions
+│   │   ├── highscoreUtils.js     # High score management
+│   │   └── mathUtils.js          # Math helpers for game
+│   ├── App.jsx                 # Main App component
+│   ├── App.css                 # Global app styles
+│   ├── main.jsx                # Application entry point
+│   └── index.css               # Global CSS
+├── eslint.config.js            # ESLint configuration
+├── index.html                  # HTML entry point
+├── package.json                # Dependencies and scripts
+├── vite.config.js              # Vite configuration
+└── README.md                   # This file
 ```
 
-## 🎯 Key Features Explained
+## 🎮 How to Use
 
-### State Management
-- **Redux Store**: Centralized state with three slices (products, cart, user)
-- **Session Persistence**: Cart automatically saves to sessionStorage
-- **Auth Persistence**: User session stored in localStorage
+### Shopping Mode
 
-### Performance Optimizations
-- **Memoized Selectors**: Combined Redux selectors to reduce subscriptions
-- **useCallback Hooks**: Prevent unnecessary re-renders
-- **Inline Ref Syncing**: Eliminates redundant useEffect hooks
-- **Conditional Rendering**: Smart component mounting/unmounting
+1. **Browse Products**: Scroll through the product catalog on the main page
+2. **Search**: Use the search bar to find specific products
+3. **Filter**: Adjust the price range slider to filter products by price
+4. **Sort**: Use sorting controls to organize products by price, title, category, or rating
+5. **View Details**: Click on any product card to see detailed information
+6. **Add to Cart**: Click "Add to Cart" on product cards
+7. **Manage Cart**: 
+   - Click the cart icon in the navbar to view your cart
+   - Adjust quantities using the +/- buttons
+   - Remove items with the remove button
+8. **Checkout**: Proceed to checkout from the cart page
 
-### Game Mechanics
-- **Collision Detection**: Precise AABB collision detection
-- **Collision Resolution**: Iterative algorithm prevents product overlap
-- **Dynamic Positioning**: Seeded random positioning for consistency
-- **Progressive Difficulty**: Speed multiplier increases over time
-- **Respawn System**: Products respawn at top when reaching bottom
+### Game Mode
 
-## 🌐 Browser Support
+1. **Enable Game Mode**: Toggle the "Game Mode" switch in the control panel
+2. **Controls**: 
+   - Use **Arrow Keys** (← →) or finger touch in mobile mode to move the player left and right
+   - Products fall from the top of the screen
+   - Avoid colliding with falling products
+3. **Speed Control**: Adjust game speed using the speed slider
+4. **Pause**: Click the pause button or press **Space** to pause the game
+5. **Score**: Your score increases the longer you survive
+6. **Game Over**: When you collide with a product, the game ends and displays your score
+7. **High Scores**: Your best scores are saved and displayed
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+### User Accounts
 
-## 📄 License
+**Regular User**:
+- Create an account or login to save your cart
+- Track your orders and checkout history
+- Access personalized features
 
-This project is part of the EPICODE Front-End Development course capstone project.
+**Admin User**:
+- All regular user features
+- Access to admin control panel
+- Customize game field background
+- Additional store management options
 
-## 🤝 Contributing
 
-This is an educational project. Feel free to fork and experiment!
 
-## 📧 Contact
+## 🏗️ State Management
 
-For questions or feedback about this project, please reach out through the course channels.
+### Redux Store
 
----
+The application uses Redux Toolkit for centralized state management with three main slices:
 
-**Built with ❤️ and ☕ as part of the EPICODE Front-End Development Course**
+1. **Products Slice** (`productsSlice.js`)
+   - Manages product catalog
+   - Handles async product fetching from Fake Store API
+   - Loading and error states
+
+2. **Cart Slice** (`cartSlice.js`)
+   - Shopping cart items and quantities
+   - Cart operations (add, remove, update, clear)
+   - SessionStorage persistence
+
+3. **User Slice** (`userSlice.js`)
+   - User authentication state
+   - Login/logout actions
+   - Role-based access control
+   - LocalStorage persistence
+
+## 🎨 Styling Approach
+
+- **Component-Level CSS**: Each component has its own CSS file for isolated styling
+- **Bootstrap/React Bootstrap Framework**: Provides responsive grid, buttons, forms, and modals
+- **Custom CSS Variables**: Used for consistent theming
+
+## 🔒 Data Persistence
+
+- **Cart Data**: Stored in `sessionStorage` - persists during browser session
+- **User Data**: Stored in `localStorage` - persists across browser sessions
+- **High Scores**: Stored in `localStorage` - permanent score tracking
+
+## 🐛 Known Issues & Future Improvements
+
+- [ ] Add more game modes and difficulty levels
+- [ ] Speed don't always reset correctly when playing again
+- [ ] Collisions fail at times
+- [ ] User profile pages with order history
+- [ ] Product reviews and ratings system
+- [ ] Wishlist functionality
+
