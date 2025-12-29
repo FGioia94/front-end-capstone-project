@@ -61,12 +61,6 @@ notAnEcommerceClone is a full-featured e-commerce platform that fetches real pro
 - **normalize.css** - CSS reset for consistent styling across browsers
 - **Custom CSS** - Component-specific styling
 
-### Build Tools & Development
-- **Vite 4.2.2** - Lightning-fast build tool and dev server
-- **@vitejs/plugin-react-swc** - Fast Refresh using SWC
-- **ESLint 9.39.1** - Code linting and quality checks
-- **eslint-plugin-react-hooks** - React hooks linting rules
-
 ### External APIs
 - **Fake Store API** - Product data source (https://fakestoreapi.com)
 
