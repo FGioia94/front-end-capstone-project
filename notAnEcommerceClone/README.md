@@ -1,5 +1,7 @@
 # notAnEcommerceClone
 
+Here is a introductive video to provide a detailed overview of the project: https://drive.google.com/file/d/1jMIh0V6aliyejbc9mY6HOCC5h6l0PFO_/view?usp=sharing
+
 A React-based e-commerce application with an innovative game mode twist. This project combines traditional online shopping functionality with an interactive gaming experience where products behave like blocks falling down! Built as my front-end course capstone project at EPICODE.
 
 ## 🎯 Overview
